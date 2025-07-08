@@ -5,7 +5,7 @@ import type React from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Github, Users, Code, MessageSquare, Huggingface } from "lucide-react"
+import { Github, Users, Code, MessageSquare } from "lucide-react"
 
 export function CommunitySection() {
   return (
