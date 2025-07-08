@@ -29,12 +29,18 @@ export default function Home() {
               <Link href="/platform">Platform</Link>
             </Button>
             <Button variant="ghost" asChild>
+              <Link href="/developer">Developer Portal</Link>
+            </Button>
+            <Button variant="ghost" asChild>
               <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
                 GitHub
               </Link>
             </Button>
             <Button asChild>
               <Link href="/demo">Try Demo</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/auth/signin">Sign In</Link>
             </Button>
           </div>
         </div>
