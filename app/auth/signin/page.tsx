@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -15,7 +15,7 @@ import { Eye, EyeOff, Database, ArrowLeft, Github, Mail, AlertCircle, Loader2 } 
 import { useAuth } from "@/lib/auth/context"
 import type { LoginCredentials } from "@/lib/auth/types"
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login, state } = useAuth()
@@ -270,5 +270,34 @@ export default function SignInPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Database className="h-8 w-8 text-primary" />
+              Tensorus
+            </Link>
+            <p className="text-muted-foreground mt-2">
+              Loading...
+            </p>
+          </div>
+          <Card className="border-0 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   )
 }
