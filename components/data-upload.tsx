@@ -138,7 +138,7 @@ export function DataUpload({ onUpload, isProcessing, existingFiles }: DataUpload
 
       // Marketing affects traffic with a lag
       if (i > 0) {
-        traffic += (rows[i - 1][2] - 200) * 5
+        traffic += (Number(rows[i - 1][2]) - 200) * 5
       }
 
       // Traffic affects sales

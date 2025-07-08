@@ -126,10 +126,10 @@ export function convertToTensor(parsedData: any): TensorData {
   const { headers, data } = parsedData
 
   // Filter only numeric columns for tensor conversion
-  const numericHeaders = headers.filter((header) => typeof data[0][header] === "number")
+  const numericHeaders = headers.filter((header: string) => typeof data[0][header] === "number")
 
   // Extract numeric data
-  const numericData = data.map((row: any) => numericHeaders.map((header) => row[header]))
+  const numericData = data.map((row: any) => numericHeaders.map((header: string) => row[header]))
 
   // Calculate statistics
   const stats = calculateStatistics(numericData, numericHeaders)
@@ -290,7 +290,7 @@ export function performClustering(data: number[][], k = 3) {
 
   // Assign points to clusters
   let clusters = assignToClusters(normalizedData, centroids)
-  let oldClusters = []
+  let oldClusters: number[] = []
   let iterations = 0
   const maxIterations = 10
 
@@ -340,7 +340,7 @@ function normalizeData(data: number[][]) {
 
 // Initialize centroids using k-means++ method
 function initializeCentroids(data: number[][], k: number) {
-  const centroids = []
+  const centroids: number[][] = []
   const n = data.length
   const cols = data[0].length
 
@@ -680,14 +680,14 @@ function handleAnomalyQuery(query: string, tensorData: TensorData) {
   const { stats } = tensorData
 
   // Simple anomaly detection using z-score
-  const anomalies = []
+  const anomalies: number[] = []
   const threshold = 2.5 // Z-score threshold
 
   for (let i = 0; i < tensor.length; i++) {
     let isAnomaly = false
 
     for (let j = 0; j < tensor[i].length; j++) {
-      const zScore = Math.abs((tensor[i][j] - stats.mean[j]) / stats.stdDev[j])
+      const zScore = Math.abs((tensor[i][j] - stats!.mean[j]) / stats!.stdDev[j])
       if (zScore > threshold) {
         isAnomaly = true
         break
@@ -722,7 +722,7 @@ function handleCorrelationQuery(query: string, tensorData: TensorData) {
   const fields = tensorData.fields || []
 
   // Calculate correlation matrix
-  const correlations = []
+  const correlations: number[][] = []
   const n = tensor[0].length
 
   for (let i = 0; i < n; i++) {
@@ -758,7 +758,7 @@ function handleCorrelationQuery(query: string, tensorData: TensorData) {
   }
 
   // Find strongest correlations
-  const pairs = []
+  const pairs: { field1: string; field2: string; correlation: number }[] = []
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       pairs.push({
@@ -795,21 +795,21 @@ function handleSummaryQuery(query: string, tensorData: TensorData) {
   const { stats, fields } = tensorData
 
   // Generate insights based on statistics
-  const insights = []
+  const insights: string[] = []
 
   // Check for skewed distributions
-  for (let i = 0; i < stats.mean.length; i++) {
+  for (let i = 0; i < stats!.mean.length; i++) {
     const fieldName = fields?.[i] || `Field ${i + 1}`
-    const range = stats.max[i] - stats.min[i]
+    const range = stats!.max[i] - stats!.min[i]
 
-    if (stats.mean[i] - stats.min[i] < 0.25 * range) {
+    if (stats!.mean[i] - stats!.min[i] < 0.25 * range) {
       insights.push(`${fieldName} is positively skewed with most values concentrated at the lower end.`)
-    } else if (stats.max[i] - stats.mean[i] < 0.25 * range) {
+    } else if (stats!.max[i] - stats!.mean[i] < 0.25 * range) {
       insights.push(`${fieldName} is negatively skewed with most values concentrated at the higher end.`)
     }
 
     // Check for high variance
-    if (stats.stdDev[i] > 0.5 * range) {
+    if (stats!.stdDev[i] > 0.5 * range) {
       insights.push(`${fieldName} shows high variability relative to its range.`)
     }
   }
@@ -822,12 +822,12 @@ function handleSummaryQuery(query: string, tensorData: TensorData) {
 
   const visualData = {
     type: "summary",
-    labels: fields?.length ? fields : Array.from({ length: stats.mean.length }, (_, i) => `Field ${i + 1}`),
+    labels: fields?.length ? fields : Array.from({ length: stats!.mean.length }, (_, i) => `Field ${i + 1}`),
     stats: {
-      min: stats.min,
-      max: stats.max,
-      mean: stats.mean,
-      stdDev: stats.stdDev,
+      min: stats!.min,
+      max: stats!.max,
+      mean: stats!.mean,
+      stdDev: stats!.stdDev,
     },
   }
 

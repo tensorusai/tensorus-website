@@ -190,7 +190,7 @@ function AgentCard({
               >
                 <div className="flex justify-between items-start">
                   <span className="font-medium">{new Date(msg.timestamp).toLocaleTimeString()}</span>
-                  {msg.content.length > 100 && (
+                  {msg.message.length > 100 && (
                     <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => onToggleExpand(msg.id)}>
                       {expandedMessages[msg.id] ? (
                         <ChevronUp className="h-3 w-3" />
@@ -200,10 +200,10 @@ function AgentCard({
                     </Button>
                   )}
                 </div>
-                <p className={`mt-1 ${!expandedMessages[msg.id] && msg.content.length > 100 ? "line-clamp-2" : ""}`}>
-                  {msg.content}
+                <p className={`mt-1 ${!expandedMessages[msg.id] && msg.message.length > 100 ? "line-clamp-2" : ""}`}>
+                  {msg.message}
                 </p>
-                {!expandedMessages[msg.id] && msg.content.length > 100 && (
+                {!expandedMessages[msg.id] && msg.message.length > 100 && (
                   <Button variant="link" size="sm" className="h-5 p-0 text-xs" onClick={() => onToggleExpand(msg.id)}>
                     Show more
                   </Button>
