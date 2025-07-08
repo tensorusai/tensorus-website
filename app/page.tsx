@@ -39,6 +39,9 @@ export default function Home() {
             <Button asChild>
               <Link href="/demo">Try Demo</Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link href="/auth/signin">Sign In</Link>
+            </Button>
           </div>
         </div>
       </header>
