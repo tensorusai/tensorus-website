@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "@/lib/auth/context"
+import { useAuth } from "@/lib/supabase/context"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,19 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
-import { 
-  Database, 
-  Key, 
-  Activity, 
-  Settings, 
-  BarChart3, 
-  Users, 
-  Zap, 
-  Clock,
-  TrendingUp,
-  Shield,
-  Plus
-} from "lucide-react"
+import { Database, Key, Activity, Settings, BarChart3, Users, Zap, Clock, TrendingUp, Shield, Plus } from "lucide-react"
 import Link from "next/link"
 
 export default function DashboardPage() {
@@ -29,7 +17,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!state.isAuthenticated && !state.isLoading) {
-      router.push('/auth/signin?redirect=/dashboard')
+      router.push("/auth/signin?redirect=/dashboard")
     }
   }, [state.isAuthenticated, state.isLoading, router])
 
@@ -66,9 +54,13 @@ export default function DashboardPage() {
               </Button>
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} />
+                  <AvatarImage src={user.avatar || "/placeholder.svg"} />
                   <AvatarFallback>
-                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block text-sm">
@@ -88,12 +80,8 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* Welcome Section */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user.name.split(' ')[0]}!
-            </h1>
-            <p className="text-muted-foreground">
-              Here's an overview of your Tensorus account and recent activity.
-            </p>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user.name.split(" ")[0]}!</h1>
+            <p className="text-muted-foreground">Here's an overview of your Tensorus account and recent activity.</p>
           </div>
 
           {/* Quick Stats */}
@@ -109,7 +97,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-2">
@@ -121,7 +109,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-2">
@@ -133,7 +121,7 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-2">
@@ -156,40 +144,38 @@ export default function DashboardPage() {
                   <Shield className="h-5 w-5" />
                   Account Overview
                 </CardTitle>
-                <CardDescription>
-                  Your account details and subscription status
-                </CardDescription>
+                <CardDescription>Your account details and subscription status</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Plan</span>
-                  <Badge variant={user.plan === 'enterprise' ? 'default' : user.plan === 'pro' ? 'secondary' : 'outline'}>
-                    {user.plan === 'enterprise' ? 'Enterprise' : user.plan === 'pro' ? 'Pro' : 'Free'}
+                  <Badge
+                    variant={user.plan === "enterprise" ? "default" : user.plan === "pro" ? "secondary" : "outline"}
+                  >
+                    {user.plan === "enterprise" ? "Enterprise" : user.plan === "pro" ? "Pro" : "Free"}
                   </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Email Status</span>
-                  <Badge variant={user.emailVerified ? 'default' : 'destructive'}>
-                    {user.emailVerified ? 'Verified' : 'Unverified'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">2FA</span>
-                  <Badge variant={user.twoFactorEnabled ? 'default' : 'outline'}>
-                    {user.twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Member Since</span>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </span>
                 </div>
 
-                <Button variant="outline" className="w-full" asChild>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Email Status</span>
+                  <Badge variant={user.emailVerified ? "default" : "destructive"}>
+                    {user.emailVerified ? "Verified" : "Unverified"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">2FA</span>
+                  <Badge variant={user.twoFactorEnabled ? "default" : "outline"}>
+                    {user.twoFactorEnabled ? "Enabled" : "Disabled"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Member Since</span>
+                  <span className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
+                </div>
+
+                <Button variant="outline" className="w-full bg-transparent" asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Account Settings
@@ -205,9 +191,7 @@ export default function DashboardPage() {
                   <BarChart3 className="h-5 w-5" />
                   Usage Statistics
                 </CardTitle>
-                <CardDescription>
-                  Your API usage for the current month
-                </CardDescription>
+                <CardDescription>Your API usage for the current month</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -217,7 +201,7 @@ export default function DashboardPage() {
                   </div>
                   <Progress value={12.47} className="h-2" />
                 </div>
-                
+
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">Data Processing</span>
@@ -225,7 +209,7 @@ export default function DashboardPage() {
                   </div>
                   <Progress value={6.4} className="h-2" />
                 </div>
-                
+
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">AI Agent Calls</span>
@@ -238,7 +222,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground mb-3">
                     You're on the <strong>{user.plan}</strong> plan. Upgrade for higher limits.
                   </p>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full bg-transparent">
                     <Zap className="mr-2 h-4 w-4" />
                     Upgrade Plan
                   </Button>
@@ -253,33 +237,31 @@ export default function DashboardPage() {
                   <Zap className="h-5 w-5" />
                   Quick Actions
                 </CardTitle>
-                <CardDescription>
-                  Common tasks and shortcuts
-                </CardDescription>
+                <CardDescription>Common tasks and shortcuts</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
                   <Link href="/developer/keys">
                     <Key className="mr-2 h-4 w-4" />
                     Manage API Keys
                   </Link>
                 </Button>
-                
-                <Button variant="outline" className="w-full justify-start" asChild>
+
+                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
                   <Link href="/demo">
                     <Database className="mr-2 h-4 w-4" />
                     Try Demo
                   </Link>
                 </Button>
-                
-                <Button variant="outline" className="w-full justify-start" asChild>
+
+                <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
                   <Link href="/guide">
                     <Users className="mr-2 h-4 w-4" />
                     View Documentation
                   </Link>
                 </Button>
-                
-                <Button variant="outline" className="w-full justify-start">
+
+                <Button variant="outline" className="w-full justify-start bg-transparent">
                   <Plus className="mr-2 h-4 w-4" />
                   Create New Project
                 </Button>
@@ -293,9 +275,7 @@ export default function DashboardPage() {
                   <Clock className="h-5 w-5" />
                   Recent Activity
                 </CardTitle>
-                <CardDescription>
-                  Your latest API calls and operations
-                </CardDescription>
+                <CardDescription>Your latest API calls and operations</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -306,7 +286,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground">2 minutes ago</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <div className="flex-1 min-w-0">
@@ -314,7 +294,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground">1 hour ago</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                     <div className="flex-1 min-w-0">
@@ -322,7 +302,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground">3 hours ago</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     <div className="flex-1 min-w-0">

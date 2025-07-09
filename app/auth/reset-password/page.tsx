@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -9,15 +11,15 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Database, ArrowLeft, Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
-import { useAuth } from "@/lib/auth/context"
+import { useAuth } from "@/lib/supabase/context"
 
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth()
-  
-  const [email, setEmail] = useState('')
+
+  const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
 
   const validateEmail = (email: string): boolean => {
     return /\S+@\S+\.\S+/.test(email)
@@ -25,30 +27,30 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email) {
-      setError('Email is required')
+      setError("Email is required")
       return
     }
-    
+
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address')
+      setError("Please enter a valid email address")
       return
     }
 
     setIsSubmitting(true)
-    setError('')
+    setError("")
 
     try {
       const response = await resetPassword(email)
-      
+
       if (response.success) {
         setIsSubmitted(true)
       } else {
-        setError(response.error?.message || 'Failed to send reset email')
+        setError(response.error?.message || "Failed to send reset email")
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.')
+      setError("An unexpected error occurred. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -58,13 +60,12 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="text-center mb-8">
-              <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity"
+              >
                 <Database className="h-8 w-8 text-primary" />
                 Tensorus
               </Link>
@@ -95,11 +96,11 @@ export default function ResetPasswordPage() {
                   <p className="text-sm text-muted-foreground">
                     Didn't receive the email? Check your spam folder or try again.
                   </p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setIsSubmitted(false)
-                      setEmail('')
+                      setEmail("")
                     }}
                     className="w-full"
                   >
@@ -126,19 +127,16 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity"
+            >
               <Database className="h-8 w-8 text-primary" />
               Tensorus
             </Link>
-            <p className="text-muted-foreground mt-2">
-              Reset your password
-            </p>
+            <p className="text-muted-foreground mt-2">Reset your password</p>
           </div>
 
           <Card className="border-0 shadow-lg">
@@ -173,11 +171,7 @@ export default function ResetPasswordPage() {
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -206,8 +200,8 @@ export default function ResetPasswordPage() {
                   <strong>Remember your password?</strong> You can{" "}
                   <Link href="/auth/signin" className="text-primary hover:underline">
                     sign in here
-                  </Link>
-                  {" "}or{" "}
+                  </Link>{" "}
+                  or{" "}
                   <Link href="/auth/signup" className="text-primary hover:underline">
                     create a new account
                   </Link>
