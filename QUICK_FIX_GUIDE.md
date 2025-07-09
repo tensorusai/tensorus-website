@@ -6,30 +6,30 @@ The build is failing because the Supabase packages need to be installed. Here's 
 ## 🔧 Immediate Fix Steps
 
 ### 1. Install Supabase Packages
-```bash
+\`\`\`bash
 # Force install the packages that are already in package.json
 npm install --force
-```
+\`\`\`
 
 ### 2. Alternative: Install Manually
 If npm install fails, try installing the packages manually:
-```bash
+\`\`\`bash
 npm install @supabase/supabase-js@latest --save
 npm install @supabase/auth-helpers-nextjs@latest --save
-```
+\`\`\`
 
 ### 3. Set Environment Variables
 Make sure your `.env.local` file has these values:
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=https://pfsziwinxezlalkevxgk.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
-```
+\`\`\`
 
 ### 4. Build After Installation
-```bash
+\`\`\`bash
 npm run build
-```
+\`\`\`
 
 ## 🎯 What Was Fixed
 
@@ -57,14 +57,14 @@ npm run build
 ## 🚀 Next Steps After Package Installation
 
 1. **Test the build:**
-   ```bash
+   \`\`\`bash
    npm run build
-   ```
+   \`\`\`
 
 2. **Run in development:**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 3. **Set up Supabase database:**
    - Run the SQL migrations in your Supabase dashboard
@@ -80,15 +80,15 @@ Required packages (should be installed):
 ## 🔍 If Build Still Fails
 
 1. **Clear cache:**
-   ```bash
+   \`\`\`bash
    npm run build -- --no-cache
-   ```
+   \`\`\`
 
 2. **Delete node_modules and reinstall:**
-   ```bash
+   \`\`\`bash
    rm -rf node_modules package-lock.json
    npm install
-   ```
+   \`\`\`
 
 3. **Check environment variables:**
    - Ensure `.env.local` has correct values
