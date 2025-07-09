@@ -42,11 +42,11 @@ export const projectService = {
       // Upload file if provided
       if (form.file) {
         const fileExt = form.file.name.split('.').pop()
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`
+        const filePath = `${user.id}/${Date.now()}.${fileExt}`
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('project-files')
-          .upload(fileName, form.file)
+          .upload(filePath, form.file)
 
         if (uploadError) {
           return { success: false, error: 'File upload failed' }
