@@ -25,16 +25,16 @@
 ## Next Steps for Deployment:
 
 1. **Install dependencies:**
-   ```bash
+   \`\`\`bash
    npm install @supabase/supabase-js @supabase/auth-helpers-nextjs @supabase/auth-helpers-react
-   ```
+   \`\`\`
 
 2. **Set environment variables:**
-   ```
+   \`\`\`
    NEXT_PUBLIC_SUPABASE_URL=your-project-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   ```
+   \`\`\`
 
 3. **Run database migrations in Supabase dashboard**
 

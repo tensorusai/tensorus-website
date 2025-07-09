@@ -9,9 +9,9 @@
 ## Installation
 
 1. **Install Supabase dependencies:**
-   ```bash
+   \`\`\`bash
    npm install @supabase/supabase-js @supabase/auth-helpers-nextjs @supabase/auth-helpers-react
-   ```
+   \`\`\`
 
 2. **Set up Supabase project:**
    - Go to [supabase.com](https://supabase.com)
@@ -19,16 +19,16 @@
    - Wait for setup to complete
 
 3. **Configure environment variables:**
-   ```bash
+   \`\`\`bash
    cp .env.local.example .env.local
-   ```
+   \`\`\`
    
    Fill in your Supabase credentials:
-   ```
+   \`\`\`
    NEXT_PUBLIC_SUPABASE_URL=your-project-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   ```
+   \`\`\`
 
 ## Database Setup
 
@@ -38,11 +38,11 @@
    - Run `supabase/migrations/002_add_storage_policies.sql`
 
 2. **Or using Supabase CLI:**
-   ```bash
+   \`\`\`bash
    supabase init
    supabase link --project-ref your-project-id
    supabase db push
-   ```
+   \`\`\`
 
 ## Authentication Configuration
 
@@ -92,9 +92,9 @@
 ## Development
 
 1. **Start development server:**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 2. **Access the application:**
    - Open http://localhost:3000
@@ -113,7 +113,7 @@ The new Supabase implementation replaces localStorage with:
 
 ## File Structure
 
-```
+\`\`\`
 lib/supabase/
 ├── client.ts              # Client-side Supabase client
 ├── server.ts              # Server-side Supabase client
@@ -135,7 +135,7 @@ app/api/
 supabase/
 ├── migrations/            # Database migrations
 └── seed.sql              # Sample data
-```
+\`\`\`
 
 ## Testing
 
@@ -157,11 +157,11 @@ supabase/
 ## Deployment
 
 1. **Production environment:**
-   ```bash
+   \`\`\`bash
    NEXT_PUBLIC_SUPABASE_URL=your-production-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-production-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-production-service-role-key
-   ```
+   \`\`\`
 
 2. **Configure auth redirect URLs:**
    - Add your production domain to Supabase auth settings

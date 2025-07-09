@@ -60,7 +60,7 @@ Tensorus is a cutting-edge platform that revolutionizes how you interact with te
 - **Deployment**: Vercel with automatic deployments
 
 ### Project Structure
-```
+\`\`\`
 tensorus-website/
 ├── app/                    # Next.js app router pages
 │   ├── auth/              # Authentication pages
@@ -76,7 +76,7 @@ tensorus-website/
 │   └── auth/             # Authentication system
 ├── utils/                 # Data processing utilities
 └── types/                 # TypeScript type definitions
-```
+\`\`\`
 
 ## 🚀 Getting Started
 
@@ -87,28 +87,28 @@ tensorus-website/
 ### Installation
 
 1. **Clone the repository**
-   ```bash
+   \`\`\`bash
    git clone https://github.com/your-username/tensorus-website.git
    cd tensorus-website
-   ```
+   \`\`\`
 
 2. **Install dependencies**
-   ```bash
+   \`\`\`bash
    npm install
    # or
    pnpm install
    # or
    yarn install
-   ```
+   \`\`\`
 
 3. **Start development server**
-   ```bash
+   \`\`\`bash
    npm run dev
    # or
    pnpm dev
    # or
    yarn dev
-   ```
+   \`\`\`
 
 4. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
@@ -144,27 +144,27 @@ For testing, use these credentials:
 ## 🔧 API Reference
 
 ### Authentication
-```typescript
+\`\`\`typescript
 POST /api/auth/login
 POST /api/auth/register
 POST /api/auth/refresh
 POST /api/auth/logout
-```
+\`\`\`
 
 ### Data Processing
-```typescript
+\`\`\`typescript
 POST /api/data/upload
 GET /api/data/process/{id}
 POST /api/data/query
 GET /api/data/tensors
-```
+\`\`\`
 
 ### Agent Network
-```typescript
+\`\`\`typescript
 GET /api/agents/status
 GET /api/agents/messages
 POST /api/agents/query
-```
+\`\`\`
 
 ## 🌟 Key Improvements Made
 
@@ -196,10 +196,10 @@ This project is optimized for Vercel deployment:
 3. **Deploy** - Automatic deployments on every commit to main branch
 
 ### Manual Deployment
-```bash
+\`\`\`bash
 npm run build
 npm run start
-```
+\`\`\`
 
 ## 🔄 Development Workflow
 
