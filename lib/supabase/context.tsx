@@ -31,7 +31,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           const profile = await authService.getCurrentUser()
-          setUser(profile)
+          if (profile) {
+            setUser(profile)
+          } else {
+            // Profile doesn't exist yet, but user is authenticated
+            // This can happen during signup - keep loading state
+            console.log('Profile not found for authenticated user, keeping loading state')
+          }
         }
       } catch (error) {
         console.error('Error getting initial session:', error)
@@ -47,7 +53,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           const profile = await authService.getCurrentUser()
-          setUser(profile)
+          if (profile) {
+            setUser(profile)
+          } else {
+            // Profile doesn't exist yet, but user is authenticated
+            console.log('Profile not found for newly signed in user')
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
         }

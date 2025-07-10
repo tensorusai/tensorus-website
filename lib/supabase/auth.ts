@@ -66,8 +66,23 @@ export const authService = {
           }
         }
 
+        // If profile still doesn't exist, create it manually (fallback)
         if (!profile) {
-          return { success: false, error: 'Profile creation failed' }
+          const { data: createdProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email!,
+              name: name || 'User'
+            })
+            .select()
+            .single()
+          
+          if (createError) {
+            return { success: false, error: 'Profile creation failed: ' + createError.message }
+          }
+          
+          profile = createdProfile
         }
 
         return { success: true, user: profile }
