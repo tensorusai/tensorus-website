@@ -21,7 +21,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
-  const supabase = createClient()
+  
+  let supabase
+  try {
+    supabase = createClient()
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error)
+    return (
+      <AuthContext.Provider value={{
+        user: null,
+        loading: false,
+        signIn: async () => ({ success: false, error: 'Supabase not configured' }),
+        signUp: async () => ({ success: false, error: 'Supabase not configured' }),
+        signOut: async () => {},
+        updateProfile: async () => ({ success: false, error: 'Supabase not configured' }),
+        resetPassword: async () => ({ success: false, error: 'Supabase not configured' }),
+      }}>
+        {children}
+      </AuthContext.Provider>
+    )
+  }
 
   useEffect(() => {
     // Get initial session
