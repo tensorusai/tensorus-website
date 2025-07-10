@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/supabase/context"
 
 export default function ResetPasswordPage() {
-  const { supabase } = useAuth()
+  const { resetPassword } = useAuth()
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -20,12 +20,10 @@ export default function ResetPasswordPage() {
     setPending(true)
     setError(null)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/auth/update-password`,
-    })
+    const response = await resetPassword(email)
 
-    if (error) {
-      setError(error.message)
+    if (!response.success) {
+      setError(response.error || "An error occurred during password reset")
     } else {
       setSent(true)
     }

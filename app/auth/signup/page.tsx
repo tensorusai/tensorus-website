@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/supabase/context"
 
 export default function SignUpPage() {
   const router = useRouter()
-  const { user, loading, supabase } = useAuth()
+  const { user, loading, signUp } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [pending, setPending] = useState(false)
@@ -26,9 +26,9 @@ export default function SignUpPage() {
     e.preventDefault()
     setPending(true)
     setError(null)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
+    const response = await signUp({ email, password })
+    if (!response.success) {
+      setError(response.error || "An error occurred during signup")
       setPending(false)
       return
     }
