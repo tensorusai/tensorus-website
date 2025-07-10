@@ -39,6 +39,7 @@ export const authService = {
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           data: {
             name,
           }
@@ -230,7 +231,7 @@ export const authService = {
       const supabase = createClient()
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
       })
 
       if (error) {

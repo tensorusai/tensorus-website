@@ -30,12 +30,23 @@ function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const redirectTo = searchParams?.get('redirect') || '/dashboard'
+  const error = searchParams?.get('error')
 
   useEffect(() => {
     if (state.isAuthenticated) {
       router.push(redirectTo)
     }
   }, [state.isAuthenticated, router, redirectTo])
+
+  useEffect(() => {
+    if (error) {
+      if (error === 'confirmation_failed') {
+        setErrors({ general: 'Email confirmation failed. Please try again or request a new confirmation email.' })
+      } else if (error === 'callback_error') {
+        setErrors({ general: 'An error occurred during sign in. Please try again.' })
+      }
+    }
+  }, [error])
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
