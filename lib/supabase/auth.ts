@@ -26,6 +26,15 @@ export const authService = {
     try {
       const supabase = createClient()
       
+      // Validate inputs
+      if (!email || !password || !name) {
+        return { success: false, error: 'All fields are required' }
+      }
+      
+      if (password.length < 6) {
+        return { success: false, error: 'Password must be at least 6 characters' }
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -37,60 +46,86 @@ export const authService = {
       })
 
       if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('User already registered')) {
+          return { success: false, error: 'An account with this email already exists. Please sign in instead.' }
+        }
+        if (error.message.includes('Invalid email')) {
+          return { success: false, error: 'Please enter a valid email address.' }
+        }
+        if (error.message.includes('Password')) {
+          return { success: false, error: 'Password must be at least 6 characters long.' }
+        }
         return { success: false, error: error.message }
       }
 
       if (data.user) {
-        // Get the created profile with retry mechanism
+        // Handle email confirmation requirement
+        if (!data.session) {
+          return { 
+            success: true, 
+            user: null,
+            error: 'Please check your email and click the confirmation link to activate your account.'
+          }
+        }
+
+        // Wait a moment for the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // Try to get the profile with better error handling
         let profile = null
-        let profileError = null
         
-        // Retry up to 3 times with increasing delays
-        for (let i = 0; i < 3; i++) {
-          const { data: profileData, error: err } = await supabase
+        try {
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', data.user.id)
-            .single()
+            .maybeSingle() // Use maybeSingle to avoid errors if no row found
           
           if (profileData) {
             profile = profileData
-            break
+          } else {
+            // Create profile manually if trigger failed
+            const { data: createdProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                email: data.user.email!,
+                name: name
+              })
+              .select()
+              .single()
+            
+            if (createdProfile) {
+              profile = createdProfile
+            } else {
+              console.error('Profile creation failed:', createError)
+              // Continue without profile - user can complete setup later
+            }
           }
-          
-          profileError = err
-          
-          // Wait before retrying (100ms, 200ms, 400ms)
-          if (i < 2) {
-            await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, i)))
-          }
+        } catch (profileErr) {
+          console.error('Profile fetch/create error:', profileErr)
+          // Continue without profile - user can complete setup later
         }
 
-        // If profile still doesn't exist, create it manually (fallback)
-        if (!profile) {
-          const { data: createdProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email: data.user.email!,
-              name: name || 'User'
-            })
-            .select()
-            .single()
-          
-          if (createError) {
-            return { success: false, error: 'Profile creation failed: ' + createError.message }
+        return { 
+          success: true, 
+          user: profile || {
+            id: data.user.id,
+            email: data.user.email!,
+            name: name,
+            avatar_url: null,
+            plan: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           }
-          
-          profile = createdProfile
         }
-
-        return { success: true, user: profile }
       }
 
-      return { success: false, error: 'User creation failed' }
+      return { success: false, error: 'Registration failed. Please try again.' }
     } catch (error) {
-      return { success: false, error: 'An unexpected error occurred' }
+      console.error('Signup error:', error)
+      return { success: false, error: 'An unexpected error occurred. Please try again.' }
     }
   },
 

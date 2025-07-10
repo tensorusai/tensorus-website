@@ -49,13 +49,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession()
         
         if (session?.user) {
-          const profile = await authService.getCurrentUser()
-          if (profile) {
-            setUser(profile)
-          } else {
-            // Profile doesn't exist yet, but user is authenticated
-            // This can happen during signup - keep loading state
-            console.log('Profile not found for authenticated user, keeping loading state')
+          try {
+            const profile = await authService.getCurrentUser()
+            if (profile) {
+              setUser(profile)
+            } else {
+              // Profile doesn't exist yet - create a fallback user object
+              setUser({
+                id: session.user.id,
+                email: session.user.email!,
+                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                avatar_url: null,
+                plan: 'free' as const,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+            }
+          } catch (error) {
+            console.error('Error fetching profile:', error)
+            // Create fallback user object
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+              avatar_url: null,
+              plan: 'free' as const,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
           }
         }
       } catch (error) {

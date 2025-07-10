@@ -23,17 +23,61 @@ export default function SignUpPage() {
     return null
   }
 
+  const validateForm = () => {
+    if (!name.trim()) {
+      setError("Please enter your full name")
+      return false
+    }
+    if (!email.trim()) {
+      setError("Please enter your email address")
+      return false
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address")
+      return false
+    }
+    if (!password) {
+      setError("Please enter a password")
+      return false
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters")
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setPending(true)
     setError(null)
-    const response = await signUp({ email, password, name })
-    if (!response.success) {
-      setError(response.error || "An error occurred during signup")
-      setPending(false)
+
+    if (!validateForm()) {
       return
     }
-    router.replace("/dashboard")
+
+    setPending(true)
+    
+    try {
+      const response = await signUp({ email: email.trim(), password, name: name.trim() })
+      
+      if (response.success) {
+        if (response.user) {
+          // Successful signup with user data
+          router.replace("/dashboard")
+        } else {
+          // Email confirmation required
+          setError("Please check your email and click the confirmation link to activate your account.")
+          setPending(false)
+        }
+      } else {
+        setError(response.error || "Registration failed. Please try again.")
+        setPending(false)
+      }
+    } catch (error) {
+      console.error('Signup error:', error)
+      setError("An unexpected error occurred. Please try again.")
+      setPending(false)
+    }
   }
 
   return (
