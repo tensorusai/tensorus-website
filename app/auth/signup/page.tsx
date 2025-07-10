@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const { user, loading, signUp } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,7 +27,7 @@ export default function SignUpPage() {
     e.preventDefault()
     setPending(true)
     setError(null)
-    const response = await signUp({ email, password })
+    const response = await signUp({ email, password, name })
     if (!response.success) {
       setError(response.error || "An error occurred during signup")
       setPending(false)
@@ -42,6 +43,13 @@ export default function SignUpPage() {
           <h1 className="text-2xl font-semibold text-center">Create account</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Your full name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <Input
               type="email"
               placeholder="you@example.com"
