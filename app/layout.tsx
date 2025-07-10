@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AuthProvider } from '@/lib/supabase/context'
+import { AuthProvider as SupabaseAuthProvider } from '@/lib/supabase/context'
+import { AuthProvider as RegularAuthProvider } from '@/lib/auth/context'
 import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
@@ -17,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <SupabaseAuthProvider>
+          <RegularAuthProvider>
+            {children}
+            <Toaster />
+          </RegularAuthProvider>
+        </SupabaseAuthProvider>
       </body>
     </html>
   )
