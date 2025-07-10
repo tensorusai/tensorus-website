@@ -41,14 +41,32 @@ export const authService = {
       }
 
       if (data.user) {
-        // Get the created profile
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
+        // Get the created profile with retry mechanism
+        let profile = null
+        let profileError = null
+        
+        // Retry up to 3 times with increasing delays
+        for (let i = 0; i < 3; i++) {
+          const { data: profileData, error: err } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single()
+          
+          if (profileData) {
+            profile = profileData
+            break
+          }
+          
+          profileError = err
+          
+          // Wait before retrying (100ms, 200ms, 400ms)
+          if (i < 2) {
+            await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, i)))
+          }
+        }
 
-        if (profileError) {
+        if (!profile) {
           return { success: false, error: 'Profile creation failed' }
         }
 
