@@ -9,22 +9,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Separator } from "@/components/ui/separator"
-import { Eye, EyeOff, Database, ArrowLeft, Github, Mail, AlertCircle, Loader2 } from "lucide-react"
-import { useAuth } from "@/lib/auth/context"
-import type { LoginCredentials } from "@/lib/auth/types"
+import { Eye, EyeOff, Database, ArrowLeft, AlertCircle, Loader2 } from "lucide-react"
+import { useAuth } from "@/lib/supabase/context"
+import type { LoginCredentials } from "@/lib/supabase/auth"
 
 function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login, state } = useAuth()
-  
+  const { user, loading, signIn } = useAuth()
   
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
-    rememberMe: false
   })
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -35,10 +31,10 @@ function SignInForm() {
   const urlErrorMessage = searchParams?.get('message')
 
   useEffect(() => {
-    if (state.isAuthenticated) {
+    if (user) {
       router.push(redirectTo)
     }
-  }, [state.isAuthenticated, router, redirectTo])
+  }, [user, router, redirectTo])
 
   // Handle URL errors from callback
   useEffect(() => {
@@ -78,39 +74,47 @@ function SignInForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Form submitted with data:', { email: formData.email, password: '[hidden]' })
-    
     if (!validateForm()) return
 
     setIsSubmitting(true)
     setErrors({})
 
     try {
-      console.log('Calling login function...')
-      const response = await login(formData)
-      console.log('Login response received:', response)
+      const response = await signIn(formData)
       
-      if (!response.success && response.error) {
-        console.log('Login failed, setting errors')
-        if (response.error.field) {
-          setErrors({ [response.error.field]: response.error.message })
-        } else {
-          setErrors({ general: response.error.message })
-        }
-      } else if (response.success) {
-        console.log('Login successful!')
+      if (response.success) {
+        router.push(redirectTo)
       }
     } catch (error) {
-      console.error('Login caught error:', error)
       setErrors({ general: 'An unexpected error occurred. Please try again.' })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleSocialAuth = (provider: string) => {
-    // In real app, implement OAuth flow
-    console.log(`Sign in with ${provider}`)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Database className="h-8 w-8 text-primary" />
+              Tensorus
+            </Link>
+            <p className="text-muted-foreground mt-2">
+              Loading...
+            </p>
+          </div>
+          <Card className="border-0 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -203,21 +207,6 @@ function SignInForm() {
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    checked={formData.rememberMe}
-                    onCheckedChange={(checked) => setFormData({...formData, rememberMe: checked as boolean})}
-                    disabled={isSubmitting}
-                  />
-                  <Label 
-                    htmlFor="remember" 
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    Remember me for 30 days
-                  </Label>
-                </div>
-
                 <Button 
                   type="submit" 
                   className="w-full" 
@@ -234,38 +223,6 @@ function SignInForm() {
                 </Button>
               </form>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleSocialAuth('github')}
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  <Github className="mr-2 h-4 w-4" />
-                  GitHub
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleSocialAuth('google')}
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-              </div>
-
               <div className="text-center text-sm">
                 <span className="text-muted-foreground">Don't have an account? </span>
                 <Link 
@@ -274,16 +231,6 @@ function SignInForm() {
                 >
                   Sign up
                 </Link>
-              </div>
-
-              <div className="pt-4 border-t">
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <p className="text-sm font-medium mb-2">Demo Credentials:</p>
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p><strong>Email:</strong> demo@tensorus.com</p>
-                    <p><strong>Password:</strong> password</p>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>

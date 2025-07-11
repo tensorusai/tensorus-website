@@ -70,7 +70,7 @@ export default function SignUpPage() {
           setPending(false)
         }
       } else {
-        setError(response.error || "Registration failed. Please try again.")
+        setError(response.error?.message || "Registration failed. Please try again.")
         setPending(false)
       }
     } catch (error) {

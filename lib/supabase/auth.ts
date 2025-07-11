@@ -1,14 +1,12 @@
 import { createClient } from './client'
 import { createRouteClient } from './server'
+import { AuthErrorHandler } from './error-handler'
+import { withSessionRetry } from './session-manager'
 import type { Database } from './database.types'
+import type { AuthResponse } from './error-handler'
 
 export type User = Database['public']['Tables']['profiles']['Row']
-
-export interface AuthResponse {
-  success: boolean
-  user?: User
-  error?: string
-}
+export type { AuthResponse }
 
 export interface LoginCredentials {
   email: string
@@ -24,16 +22,13 @@ export interface SignupCredentials {
 export const authService = {
   async signUp({ email, password, name }: SignupCredentials): Promise<AuthResponse> {
     try {
+      // Validate inputs using standardized validation
+      const validationError = AuthErrorHandler.validateSignupCredentials(email, password, name)
+      if (validationError) {
+        return AuthErrorHandler.createErrorResponse(validationError)
+      }
+      
       const supabase = createClient()
-      
-      // Validate inputs
-      if (!email || !password || !name) {
-        return { success: false, error: 'All fields are required' }
-      }
-      
-      if (password.length < 6) {
-        return { success: false, error: 'Password must be at least 6 characters' }
-      }
 
       // Get base URL for callback - prefer environment variable for server-side consistency
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
@@ -51,17 +46,7 @@ export const authService = {
       })
 
       if (error) {
-        // Provide user-friendly error messages
-        if (error.message.includes('User already registered')) {
-          return { success: false, error: 'An account with this email already exists. Please sign in instead.' }
-        }
-        if (error.message.includes('Invalid email')) {
-          return { success: false, error: 'Please enter a valid email address.' }
-        }
-        if (error.message.includes('Password')) {
-          return { success: false, error: 'Password must be at least 6 characters long.' }
-        }
-        return { success: false, error: error.message }
+        return AuthErrorHandler.createErrorResponse(error)
       }
 
       if (data.user) {
@@ -70,7 +55,10 @@ export const authService = {
           return { 
             success: true, 
             user: null,
-            error: 'Please check your email and click the confirmation link to activate your account.'
+            error: {
+              code: 'EMAIL_CONFIRMATION_REQUIRED',
+              message: 'Please check your email and click the confirmation link to activate your account.'
+            }
           }
         }
 
@@ -113,29 +101,32 @@ export const authService = {
           // Continue without profile - user can complete setup later
         }
 
-        return { 
-          success: true, 
-          user: profile || {
-            id: data.user.id,
-            email: data.user.email!,
-            name: name,
-            avatar_url: null,
-            plan: 'free' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        }
+        return AuthErrorHandler.createSuccessResponse(profile || {
+          id: data.user.id,
+          email: data.user.email!,
+          name: name,
+          avatar_url: null,
+          plan: 'free' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
       }
 
-      return { success: false, error: 'Registration failed. Please try again.' }
+      return AuthErrorHandler.createErrorResponse(new Error('Registration failed. Please try again.'))
     } catch (error) {
       console.error('Signup error:', error)
-      return { success: false, error: 'An unexpected error occurred. Please try again.' }
+      return AuthErrorHandler.createErrorResponse(error)
     }
   },
 
   async signIn({ email, password }: LoginCredentials): Promise<AuthResponse> {
     try {
+      // Validate inputs using standardized validation
+      const validationError = AuthErrorHandler.validateCredentials(email, password)
+      if (validationError) {
+        return AuthErrorHandler.createErrorResponse(validationError)
+      }
+      
       const supabase = createClient()
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -144,7 +135,7 @@ export const authService = {
       })
 
       if (error) {
-        return { success: false, error: error.message }
+        return AuthErrorHandler.createErrorResponse(error)
       }
 
       if (data.user) {
@@ -156,15 +147,15 @@ export const authService = {
           .single()
 
         if (profileError) {
-          return { success: false, error: 'Profile fetch failed' }
+          return AuthErrorHandler.createErrorResponse(new Error('Failed to load user profile'))
         }
 
-        return { success: true, user: profile }
+        return AuthErrorHandler.createSuccessResponse(profile)
       }
 
-      return { success: false, error: 'Sign in failed' }
+      return AuthErrorHandler.createErrorResponse(new Error('Sign in failed'))
     } catch (error) {
-      return { success: false, error: 'An unexpected error occurred' }
+      return AuthErrorHandler.createErrorResponse(error)
     }
   },
 
@@ -174,16 +165,18 @@ export const authService = {
       const { error } = await supabase.auth.signOut()
       
       if (error) {
-        return { success: false, error: error.message }
+        const standardError = AuthErrorHandler.mapSupabaseError(error)
+        return { success: false, error: standardError.message }
       }
 
       return { success: true }
     } catch (error) {
-      return { success: false, error: 'Sign out failed' }
+      const standardError = AuthErrorHandler.mapSupabaseError(error)
+      return { success: false, error: standardError.message }
     }
   },
 
-  async getCurrentUser(): Promise<User | null> {
+  getCurrentUser: withSessionRetry(async (): Promise<User | null> => {
     try {
       const supabase = createClient()
       
@@ -201,16 +194,16 @@ export const authService = {
     } catch (error) {
       return null
     }
-  },
+  }),
 
-  async updateProfile(updates: Partial<User>): Promise<AuthResponse> {
+  updateProfile: withSessionRetry(async (updates: Partial<User>): Promise<AuthResponse> => {
     try {
       const supabase = createClient()
       
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        return { success: false, error: 'Not authenticated' }
+        return AuthErrorHandler.createErrorResponse(new Error('Not authenticated'))
       }
 
       const { data, error } = await supabase
@@ -221,17 +214,23 @@ export const authService = {
         .single()
 
       if (error) {
-        return { success: false, error: error.message }
+        return AuthErrorHandler.createErrorResponse(error)
       }
 
-      return { success: true, user: data }
+      return AuthErrorHandler.createSuccessResponse(data)
     } catch (error) {
-      return { success: false, error: 'Profile update failed' }
+      return AuthErrorHandler.createErrorResponse(error)
     }
-  },
+  }),
 
   async resetPassword(email: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // Validate email
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        const standardError = AuthErrorHandler.mapSupabaseError({ message: 'Please enter a valid email address' })
+        return { success: false, error: standardError.message }
+      }
+      
       const supabase = createClient()
       
       // Get base URL for callback - prefer environment variable for server-side consistency
@@ -243,17 +242,25 @@ export const authService = {
       })
 
       if (error) {
-        return { success: false, error: error.message }
+        const standardError = AuthErrorHandler.mapSupabaseError(error)
+        return { success: false, error: standardError.message }
       }
 
       return { success: true }
     } catch (error) {
-      return { success: false, error: 'Password reset failed' }
+      const standardError = AuthErrorHandler.mapSupabaseError(error)
+      return { success: false, error: standardError.message }
     }
   },
 
   async updatePassword(password: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // Validate password
+      const validationError = AuthErrorHandler.validateCredentials('dummy@email.com', password)
+      if (validationError && validationError.code === 'WEAK_PASSWORD') {
+        return { success: false, error: validationError.message }
+      }
+      
       console.log('Calling password update API...')
       const response = await fetch('/api/auth/update-password', {
         method: 'POST',
@@ -269,7 +276,8 @@ export const authService = {
       return data
     } catch (error) {
       console.error('UpdatePassword fetch error:', error)
-      return { success: false, error: 'Password update failed' }
+      const standardError = AuthErrorHandler.mapSupabaseError(error)
+      return { success: false, error: standardError.message }
     }
   },
 
@@ -318,7 +326,7 @@ export const authService = {
 
 // Server-side auth helper
 export const serverAuthService = {
-  async getCurrentUser(): Promise<User | null> {
+  getCurrentUser: withSessionRetry(async (): Promise<User | null> => {
     try {
       const supabase = createRouteClient()
       
@@ -336,7 +344,7 @@ export const serverAuthService = {
     } catch (error) {
       return null
     }
-  },
+  }),
 
   async requireAuth(): Promise<User> {
     const user = await this.getCurrentUser()

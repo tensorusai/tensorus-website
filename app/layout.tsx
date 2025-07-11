@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AuthProvider as SupabaseAuthProvider } from '@/lib/supabase/context'
-import { AuthProvider as RegularAuthProvider } from '@/lib/auth/context'
+import { AuthProvider } from '@/lib/supabase/context'
 import { Toaster } from '@/components/ui/toaster'
 import AuthErrorHandler from '@/components/auth-error-handler'
 
@@ -19,13 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SupabaseAuthProvider>
-          <RegularAuthProvider>
-            <AuthErrorHandler />
-            {children}
-            <Toaster />
-          </RegularAuthProvider>
-        </SupabaseAuthProvider>
+        <AuthProvider>
+          <AuthErrorHandler />
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   )

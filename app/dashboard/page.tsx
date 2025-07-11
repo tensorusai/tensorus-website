@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Database, Key, Activity, Settings, BarChart3, Users, Zap, Clock, TrendingUp, Shield, Plus } from "lucide-react"
 
-import { useAuth } from "@/lib/auth/context"
+import { useAuth } from "@/lib/supabase/context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,19 +15,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 
 export default function DashboardPage() {
-  // Demo auth hook -- provides the shape { state, logout }
-  const { state, logout } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const router = useRouter()
 
   // Redirect unauthenticated visitors
   useEffect(() => {
-    if (!state.isLoading && !state.isAuthenticated) {
+    if (!loading && !user) {
       router.replace("/auth/signin?redirect=/dashboard")
     }
-  }, [state.isLoading, state.isAuthenticated, router])
+  }, [loading, user, router])
 
   /* -- Loading state ----------------------------------------------------- */
-  if (state.isLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
@@ -36,7 +35,7 @@ export default function DashboardPage() {
   }
 
   // While redirecting
-  if (!state.user) return null
+  if (!user) return null
 
   /* -- Render dashboard -------------------------------------------------- */
   return (
@@ -59,9 +58,9 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={state.user.avatar || "/placeholder-user.jpg"} />
+                <AvatarImage src={user.avatar || "/placeholder-user.jpg"} />
                 <AvatarFallback>
-                  {state.user.name
+                  {user.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
@@ -69,12 +68,12 @@ export default function DashboardPage() {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-sm md:block">
-                <div className="font-medium">{state.user.name}</div>
-                <div className="text-muted-foreground">{state.user.email}</div>
+                <div className="font-medium">{user.name}</div>
+                <div className="text-muted-foreground">{user.email}</div>
               </div>
             </div>
 
-            <Button variant="outline" onClick={logout}>
+            <Button variant="outline" onClick={signOut}>
               Sign Out
             </Button>
           </div>
@@ -85,7 +84,7 @@ export default function DashboardPage() {
       <main className="container mx-auto space-y-8 px-4 py-8">
         {/* Welcome */}
         <section>
-          <h1 className="mb-2 text-3xl font-bold">Welcome back, {state.user.name.split(" ")[0]}!</h1>
+          <h1 className="mb-2 text-3xl font-bold">Welcome back, {user.name.split(" ")[0]}!</h1>
           <p className="text-muted-foreground">Here’s an overview of your Tensorus account and recent activity.</p>
         </section>
 
@@ -99,7 +98,7 @@ export default function DashboardPage() {
 
         {/* Two-column grid */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <AccountOverview user={state.user} />
+          <AccountOverview user={user} />
           <UsageStats />
           <QuickActions />
           <RecentActivity />

@@ -31,10 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       <AuthContext.Provider value={{
         user: null,
         loading: false,
-        signIn: async () => ({ success: false, error: 'Supabase not configured' }),
-        signUp: async () => ({ success: false, error: 'Supabase not configured' }),
+        signIn: async () => ({ success: false, error: { code: 'CONFIG_ERROR', message: 'Supabase not configured' } }),
+        signUp: async () => ({ success: false, error: { code: 'CONFIG_ERROR', message: 'Supabase not configured' } }),
         signOut: async () => {},
-        updateProfile: async () => ({ success: false, error: 'Supabase not configured' }),
+        updateProfile: async () => ({ success: false, error: { code: 'CONFIG_ERROR', message: 'Supabase not configured' } }),
         resetPassword: async () => ({ success: false, error: 'Supabase not configured' }),
       }}>
         {children}
@@ -88,19 +88,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession()
 
-    // Listen for auth changes
+    // Listen for auth changes with enhanced session handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id)
+        
         if (event === 'SIGNED_IN' && session?.user) {
-          const profile = await authService.getCurrentUser()
-          if (profile) {
-            setUser(profile)
-          } else {
-            // Profile doesn't exist yet, but user is authenticated
-            console.log('Profile not found for newly signed in user')
+          try {
+            const profile = await authService.getCurrentUser()
+            if (profile) {
+              setUser(profile)
+            } else {
+              // Profile doesn't exist yet, but user is authenticated
+              console.log('Profile not found for newly signed in user')
+              // Create fallback user object
+              setUser({
+                id: session.user.id,
+                email: session.user.email!,
+                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                avatar_url: null,
+                plan: 'free' as const,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+            }
+          } catch (error) {
+            console.error('Error handling signed in user:', error)
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully')
+          // User stays the same, just token was refreshed
+        } else if (event === 'USER_UPDATED' && session?.user) {
+          try {
+            const profile = await authService.getCurrentUser()
+            if (profile) {
+              setUser(profile)
+            }
+          } catch (error) {
+            console.error('Error updating user profile:', error)
+          }
         }
         setLoading(false)
       }
@@ -123,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         toast({
           title: "Sign in failed",
-          description: response.error || "Please check your credentials",
+          description: response.error?.message || "Please check your credentials",
           variant: "destructive",
         })
       }
@@ -136,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: errorMessage,
         variant: "destructive",
       })
-      return { success: false, error: errorMessage }
+      return { success: false, error: { code: 'UNEXPECTED_ERROR', message: errorMessage } }
     } finally {
       setLoading(false)
     }
@@ -155,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         toast({
           title: "Sign up failed",
-          description: response.error || "Please check your information",
+          description: response.error?.message || "Please check your information",
           variant: "destructive",
         })
       }
@@ -168,7 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: errorMessage,
         variant: "destructive",
       })
-      return { success: false, error: errorMessage }
+      return { success: false, error: { code: 'UNEXPECTED_ERROR', message: errorMessage } }
     } finally {
       setLoading(false)
     }
@@ -207,7 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         toast({
           title: "Update failed",
-          description: response.error || "Failed to update profile",
+          description: response.error?.message || "Failed to update profile",
           variant: "destructive",
         })
       }
@@ -220,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: errorMessage,
         variant: "destructive",
       })
-      return { success: false, error: errorMessage }
+      return { success: false, error: { code: 'UNEXPECTED_ERROR', message: errorMessage } }
     }
   }
 
