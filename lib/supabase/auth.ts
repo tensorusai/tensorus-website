@@ -35,11 +35,15 @@ export const authService = {
         return { success: false, error: 'Password must be at least 6 characters' }
       }
 
+      // Get base URL for callback - prefer environment variable for server-side consistency
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
           data: {
             name,
           }
@@ -230,8 +234,12 @@ export const authService = {
     try {
       const supabase = createClient()
       
+      // Get base URL for callback - prefer environment variable for server-side consistency
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
+        redirectTo: `${baseUrl}/auth/callback?next=/auth/reset-password`,
       })
 
       if (error) {

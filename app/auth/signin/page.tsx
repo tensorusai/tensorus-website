@@ -30,7 +30,8 @@ function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const redirectTo = searchParams?.get('redirect') || '/dashboard'
-  const error = searchParams?.get('error')
+  const urlError = searchParams?.get('error')
+  const urlErrorMessage = searchParams?.get('message')
 
   useEffect(() => {
     if (state.isAuthenticated) {
@@ -38,15 +39,23 @@ function SignInForm() {
     }
   }, [state.isAuthenticated, router, redirectTo])
 
+  // Handle URL errors from callback
   useEffect(() => {
-    if (error) {
-      if (error === 'confirmation_failed') {
-        setErrors({ general: 'Email confirmation failed. Please try again or request a new confirmation email.' })
-      } else if (error === 'callback_error') {
-        setErrors({ general: 'An error occurred during sign in. Please try again.' })
+    if (urlError && urlErrorMessage) {
+      const errorMessages: Record<string, string> = {
+        'confirmation_failed': 'Email confirmation failed. Please try again or request a new confirmation email.',
+        'oauth_error': 'Authentication failed. Please try again.',
+        'missing_code': 'Invalid authentication link. Please try signing in again.',
+        'session_failed': 'Failed to create session. Please try signing in again.',
+        'callback_error': 'An error occurred during authentication. Please try again.'
       }
+      
+      setErrors({
+        general: errorMessages[urlError] || decodeURIComponent(urlErrorMessage) || 'An authentication error occurred.'
+      })
     }
-  }, [error])
+  }, [urlError, urlErrorMessage])
+
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
