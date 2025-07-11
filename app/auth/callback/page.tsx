@@ -22,6 +22,8 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        console.log('Callback page loaded with URL:', window.location.href)
+        
         // Check for errors in URL fragment (hash)
         const hash = window.location.hash
         if (hash) {
@@ -56,27 +58,16 @@ export default function AuthCallbackPage() {
           return
         }
 
-        // Check if we have query parameters that indicate this is a callback
+        // Immediately redirect to API route for processing
         const urlParams = new URLSearchParams(window.location.search)
-        const hasCallbackParams = urlParams.has('code') || urlParams.has('token_hash') || urlParams.has('access_token')
+        console.log('Query parameters:', Object.fromEntries(urlParams.entries()))
         
-        if (hasCallbackParams) {
-          setMessage('Processing authentication...')
-          
-          // The API route should handle the actual auth processing
-          // This page just shows loading state
-          const timer = setTimeout(() => {
-            // If we're still here after 8 seconds, something went wrong
-            setStatus('error')
-            setMessage('Authentication is taking longer than expected. Please try again.')
-          }, 8000)
-
-          return () => clearTimeout(timer)
-        } else {
-          // No callback parameters, redirect to signin
-          setStatus('error')
-          setMessage('Invalid authentication link. Please try signing in again.')
-        }
+        // Always redirect to API route, let it handle the auth flow
+        const apiUrl = `/api/auth/callback?${urlParams.toString()}`
+        console.log('Redirecting to API route:', apiUrl)
+        
+        // Use replace to avoid back button issues
+        window.location.replace(apiUrl)
         
       } catch (error) {
         console.error('Error in callback:', error)
