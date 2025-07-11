@@ -3,6 +3,7 @@ import './globals.css'
 import { AuthProvider as SupabaseAuthProvider } from '@/lib/supabase/context'
 import { AuthProvider as RegularAuthProvider } from '@/lib/auth/context'
 import { Toaster } from '@/components/ui/toaster'
+import AuthErrorHandler from '@/components/auth-error-handler'
 
 export const metadata: Metadata = {
   title: 'Tensorus: Agentic Tensor Database',
@@ -20,6 +21,7 @@ export default function RootLayout({
       <body>
         <SupabaseAuthProvider>
           <RegularAuthProvider>
+            <AuthErrorHandler />
             {children}
             <Toaster />
           </RegularAuthProvider>
