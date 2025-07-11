@@ -20,7 +20,6 @@ function SignInForm() {
   const searchParams = useSearchParams()
   const { login, state } = useAuth()
   
-  console.log('SignInForm loaded, auth state:', state)
   
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -36,9 +35,7 @@ function SignInForm() {
   const urlErrorMessage = searchParams?.get('message')
 
   useEffect(() => {
-    console.log('Auth state changed:', state)
     if (state.isAuthenticated) {
-      console.log('User is authenticated, redirecting to:', redirectTo)
       router.push(redirectTo)
     }
   }, [state.isAuthenticated, router, redirectTo])

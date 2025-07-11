@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={state.user.avatar || "/placeholder-state.user.jpg"} />
+                <AvatarImage src={state.user.avatar || "/placeholder-user.jpg"} />
                 <AvatarFallback>
                   {state.user.name
                     .split(" ")
@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
         {/* Two-column grid */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <AccountOverview user={user} />
+          <AccountOverview user={state.user} />
           <UsageStats />
           <QuickActions />
           <RecentActivity />
@@ -162,24 +162,24 @@ function AccountOverview({ user }: { user: any }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <Row label="Plan">
-          <Badge variant={state.user.plan === "enterprise" ? "default" : state.user.plan === "pro" ? "secondary" : "outline"}>
-            {state.user.plan.charAt(0).toUpperCase() + state.user.plan.slice(1)}
+          <Badge variant={user.plan === "enterprise" ? "default" : user.plan === "pro" ? "secondary" : "outline"}>
+            {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
           </Badge>
         </Row>
 
         <Row label="Email Status">
-          <Badge variant={state.user.emailVerified ? "default" : "destructive"}>
-            {state.user.emailVerified ? "Verified" : "Unverified"}
+          <Badge variant={user.emailVerified ? "default" : "destructive"}>
+            {user.emailVerified ? "Verified" : "Unverified"}
           </Badge>
         </Row>
 
         <Row label="2FA">
-          <Badge variant={state.user.twoFactorEnabled ? "default" : "outline"}>
-            {state.user.twoFactorEnabled ? "Enabled" : "Disabled"}
+          <Badge variant={user.twoFactorEnabled ? "default" : "outline"}>
+            {user.twoFactorEnabled ? "Enabled" : "Disabled"}
           </Badge>
         </Row>
 
-        <Row label="Member Since">{new Date(state.user.createdAt).toLocaleDateString()}</Row>
+        <Row label="Member Since">{new Date(user.createdAt).toLocaleDateString()}</Row>
 
         <Button variant="outline" className="w-full bg-transparent" asChild>
           <Link href="/settings">
