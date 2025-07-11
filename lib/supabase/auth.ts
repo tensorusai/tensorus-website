@@ -254,57 +254,42 @@ export const authService = {
 
   async updatePassword(password: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const supabase = createClient()
-      
-      // Check if user is authenticated first
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      console.log('Current user for password update:', user ? 'authenticated' : 'not authenticated', userError)
-      
-      if (!user) {
-        return { success: false, error: 'User not authenticated. Please try the reset link again.' }
-      }
-      
-      console.log('Updating password for user:', user.id)
-      const { error } = await supabase.auth.updateUser({
-        password,
+      console.log('Calling password update API...')
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
       })
 
-      if (error) {
-        console.error('Supabase updateUser error:', error)
-        return { success: false, error: error.message }
-      }
-
-      console.log('Password updated successfully')
-      return { success: true }
+      const data = await response.json()
+      console.log('Password update API response:', data)
+      
+      return data
     } catch (error) {
-      console.error('UpdatePassword catch error:', error)
+      console.error('UpdatePassword fetch error:', error)
       return { success: false, error: 'Password update failed' }
     }
   },
 
   async setSession(accessToken: string, refreshToken: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const supabase = createClient()
-      
-      console.log('Setting session with tokens:', { 
-        accessToken: accessToken ? 'present' : 'missing',
-        refreshToken: refreshToken ? 'present' : 'missing'
-      })
-      
-      const { data, error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
+      console.log('Calling set session API...')
+      const response = await fetch('/api/auth/set-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken, refreshToken }),
       })
 
-      if (error) {
-        console.error('SetSession error:', error)
-        return { success: false, error: error.message }
-      }
-
-      console.log('Session set successfully:', data.user ? 'user authenticated' : 'no user')
-      return { success: true }
+      const data = await response.json()
+      console.log('Set session API response:', data)
+      
+      return data
     } catch (error) {
-      console.error('SetSession catch error:', error)
+      console.error('SetSession fetch error:', error)
       return { success: false, error: 'Failed to set session' }
     }
   }
