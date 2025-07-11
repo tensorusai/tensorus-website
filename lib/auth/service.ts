@@ -56,7 +56,9 @@ function isValidPassword(password: string): boolean {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    console.log('=== DEMO AUTH SERVICE LOGIN START ===')
     console.log('Demo auth service login called with:', { email: credentials.email, password: '[hidden]' })
+    console.log('DEMO_USERS array:', DEMO_USERS)
     await delay(1000) // Simulate network delay
     
     const { email, password } = credentials
@@ -79,9 +81,16 @@ export const authService = {
     }
     
     // Demo authentication
-    const user = DEMO_USERS.find(u => u.email === email)
+    console.log('Searching for email:', email)
+    console.log('DEMO_USERS length:', DEMO_USERS.length)
+    console.log('DEMO_USERS emails:', DEMO_USERS.map(u => u.email))
+    
+    const user = DEMO_USERS.find(u => {
+      console.log('Comparing:', u.email, 'with', email, 'equal?', u.email === email)
+      return u.email === email
+    })
     console.log('User lookup result:', user ? 'found' : 'not found')
-    console.log('Available demo users:', DEMO_USERS.map(u => u.email))
+    if (user) console.log('Found user:', user)
     
     if (!user) {
       console.log('Login failed: User not found')
