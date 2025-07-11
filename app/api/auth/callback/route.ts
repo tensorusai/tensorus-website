@@ -80,9 +80,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/auth/signin?error=oauth_error&message=${errorMessage}`)
   }
 
-  // Handle password recovery flow
+  // Handle password recovery flow (from email template with access/refresh tokens)
   if (type === 'recovery' && accessToken && refreshToken) {
-    console.log('Handling password recovery callback')
+    console.log('Handling password recovery callback with URL tokens')
     // For password reset, always redirect to reset-password page with tokens
     return NextResponse.redirect(`${baseUrl}/auth/reset-password?type=recovery&access_token=${accessToken}&refresh_token=${refreshToken}`)
   }
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     // Handle both code and token_hash patterns
     let data, exchangeError
     if (code) {
-      // PKC
+      // PKCE flow
       const result = await supabase.auth.exchangeCodeForSession(code)
       data = result.data
       exchangeError = result.error
@@ -111,6 +111,13 @@ export async function GET(request: NextRequest) {
       })
       data = result.data
       exchangeError = result.error
+      
+      // Special handling for password recovery with token_hash
+      if (type === 'recovery' && data.session) {
+        console.log('Handling password recovery callback with token_hash')
+        // For password reset with token_hash, redirect to reset-password page with session
+        return NextResponse.redirect(`${baseUrl}/auth/reset-password?type=recovery&access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}`)
+      }
     }
     
     if (exchangeError) {
