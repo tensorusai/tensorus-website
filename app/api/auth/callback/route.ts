@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const ALLOWED_REDIRECT_PATHS = [
   '/dashboard',
   '/auth/reset-password',
+  '/auth/link-expired',
   '/developer',
   '/developer/keys',
   '/demo',

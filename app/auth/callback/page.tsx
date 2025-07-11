@@ -21,17 +21,58 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      if (error) {
-        setStatus('error')
-        setMessage('Authentication failed. Please try again.')
-        return
-      }
-
       try {
+        // Check for errors in URL fragment (hash)
+        const hash = window.location.hash
+        if (hash) {
+          const hashParams = new URLSearchParams(hash.substring(1))
+          const hashError = hashParams.get('error')
+          const hashErrorCode = hashParams.get('error_code')
+          const hashErrorDescription = hashParams.get('error_description')
+          
+          if (hashError) {
+            console.error('Hash error:', hashError, hashErrorCode, hashErrorDescription)
+            setStatus('error')
+            
+            // Provide specific error messages for different error types
+            if (hashErrorCode === 'otp_expired') {
+              // Redirect to dedicated expired link page
+              const linkType = hash.includes('recovery') ? 'recovery' : 'confirmation'
+              router.push(`/auth/link-expired?type=${linkType}`)
+              return
+            } else if (hashError === 'access_denied') {
+              setMessage('Access denied. The email link may be invalid or has already been used.')
+            } else {
+              setMessage(hashErrorDescription ? decodeURIComponent(hashErrorDescription) : 'Authentication failed. Please try again.')
+            }
+            return
+          }
+        }
+
+        // Check for errors in query parameters
+        if (error) {
+          setStatus('error')
+          setMessage('Authentication failed. Please try again.')
+          return
+        }
+
         const supabase = createClient()
         
         // First try to get session from URL (for password reset links)
         const { data: urlData, error: urlError } = await supabase.auth.getSessionFromUrl()
+        
+        if (urlError) {
+          console.error('URL session error:', urlError)
+          setStatus('error')
+          
+          // Handle specific Supabase errors
+          if (urlError.message.includes('expired') || urlError.message.includes('invalid')) {
+            setMessage('This email link has expired or is invalid. Please request a new one.')
+          } else {
+            setMessage('Authentication failed. Please try again.')
+          }
+          return
+        }
         
         if (urlData.session) {
           console.log('Got session from URL (password reset)')
@@ -85,6 +126,17 @@ export default function AuthCallbackPage() {
 
   const handleGoToDashboard = () => {
     router.push(next)
+  }
+
+  const handleRequestNewLink = () => {
+    // Check if this was a password reset link
+    const hash = window.location.hash
+    if (hash && hash.includes('recovery')) {
+      router.push('/auth/reset-password')
+    } else {
+      // For email confirmation, go to signup
+      router.push('/auth/signup')
+    }
   }
 
   return (
@@ -141,12 +193,25 @@ export default function AuthCallbackPage() {
                     <p className="text-muted-foreground">{message}</p>
                   </div>
                   <div className="space-y-2">
-                    <Button onClick={handleRetry} className="w-full">
-                      Try Again
-                    </Button>
-                    <Button variant="outline" asChild className="w-full">
-                      <Link href="/">Go Home</Link>
-                    </Button>
+                    {message.includes('expired') || message.includes('invalid') ? (
+                      <>
+                        <Button onClick={handleRequestNewLink} className="w-full">
+                          Request New Link
+                        </Button>
+                        <Button variant="outline" onClick={handleRetry} className="w-full">
+                          Sign In Instead
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button onClick={handleRetry} className="w-full">
+                          Try Again
+                        </Button>
+                        <Button variant="outline" asChild className="w-full">
+                          <Link href="/">Go Home</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </>
               )}
