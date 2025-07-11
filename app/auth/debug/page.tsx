@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Database, ArrowLeft } from 'lucide-react'
 
-export default function AuthDebugPage() {
+function AuthDebugContent() {
   const searchParams = useSearchParams()
   const [hashData, setHashData] = useState<any>(null)
   const [queryData, setQueryData] = useState<any>(null)
@@ -157,5 +157,34 @@ export default function AuthDebugPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AuthDebugPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Database className="h-8 w-8 text-primary" />
+              Tensorus
+            </Link>
+            <p className="text-muted-foreground mt-2">
+              Loading debug information...
+            </p>
+          </div>
+          <Card>
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <AuthDebugContent />
+    </Suspense>
   )
 }

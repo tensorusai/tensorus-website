@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Database, AlertCircle, Mail, ArrowLeft, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/lib/supabase/context'
 
-export default function LinkExpiredPage() {
+function LinkExpiredContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { resetPassword } = useAuth()
@@ -183,5 +183,34 @@ export default function LinkExpiredPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function LinkExpiredPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Database className="h-8 w-8 text-primary" />
+              Tensorus
+            </Link>
+            <p className="text-muted-foreground mt-2">
+              Loading...
+            </p>
+          </div>
+          <Card className="border-0 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <LinkExpiredContent />
+    </Suspense>
   )
 }
