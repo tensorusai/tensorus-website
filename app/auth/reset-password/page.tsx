@@ -44,7 +44,15 @@ function ResetPasswordForm() {
       // Set the session using the tokens
       const setSession = async () => {
         try {
-          const response = await authService.setSession(accessToken, refreshToken)
+          console.log('About to call setSession...')
+          const response = await Promise.race([
+            authService.setSession(accessToken, refreshToken),
+            new Promise<{ success: boolean; error?: string }>((_, reject) => 
+              setTimeout(() => reject(new Error('setSession timeout')), 10000)
+            )
+          ]) as { success: boolean; error?: string }
+          console.log('setSession completed with response:', response)
+          
           if (!response.success) {
             console.error('Failed to set session:', response.error)
             setError('Failed to authenticate. Please try the reset link again.')
@@ -99,7 +107,12 @@ function ResetPasswordForm() {
 
     try {
       console.log('Calling updatePassword...')
-      const response = await authService.updatePassword(password)
+      const response = await Promise.race([
+        authService.updatePassword(password),
+        new Promise<{ success: boolean; error?: string }>((_, reject) => 
+          setTimeout(() => reject(new Error('updatePassword timeout')), 10000)
+        )
+      ]) as { success: boolean; error?: string }
       console.log('UpdatePassword response:', response)
       
       if (response.success) {
