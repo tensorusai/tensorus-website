@@ -51,6 +51,7 @@ function validateNextPath(next: string | null): string {
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const tokenHash = requestUrl.searchParams.get('token_hash')
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
   const next = requestUrl.searchParams.get('next')
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
   // Debug logging
   console.log('Auth callback invoked with params:', {
     code: code ? 'present' : 'missing',
+    tokenHash: tokenHash ? 'present' : 'missing',
     error,
     errorDescription,
     next,
@@ -86,15 +88,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${baseUrl}${redirectPath}?type=recovery&access_token=${accessToken}&refresh_token=${refreshToken}`)
   }
 
-  // Handle missing code for email confirmation
-  if (!code) {
-    console.error('No authorization code provided')
-    return NextResponse.redirect(`${baseUrl}/auth/signin?error=missing_code&message=No authorization code provided`)
+  // Handle missing code/token_hash for email confirmation
+  if (!code && !tokenHash) {
+    console.error('No authorization code or token hash provided')
+    return NextResponse.redirect(`${baseUrl}/auth/signin?error=missing_code&message=No authorization code or token hash provided`)
   }
 
   try {
     const supabase = createRouteClient()
-    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    // Handle both code and token_hash patterns
+    let data, exchangeError
+    if (code) {
+      // PKC
+      const result = await supabase.auth.exchangeCodeForSession(code)
+      data = result.data
+      exchangeError = result.error
+    } else if (tokenHash) {
+      // Token hash pattern
+      const result = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: type as any || 'signup'
+      })
+      data = result.data
+      exchangeError = result.error
+    }
     
     if (exchangeError) {
       console.error('Error exchanging code for session:', exchangeError)
