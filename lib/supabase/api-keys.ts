@@ -1,5 +1,6 @@
 import { createClient } from './client'
 import { createRouteClient } from './server'
+import { ensureProfileExists } from './profile-utils'
 import type { Database } from './database.types'
 
 type APIKey = Database['public']['Tables']['api_keys']['Row']
@@ -59,19 +60,20 @@ export const apiKeyService = {
   // Create new API key
   async createAPIKey(form: APIKeyForm): Promise<APIKeyResponse> {
     try {
-      const supabase = createClient()
-      
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        return { success: false, error: 'Not authenticated' }
+      // Ensure profile exists before creating API key
+      const profile = await ensureProfileExists()
+      if (!profile) {
+        return { success: false, error: 'Not authenticated or unable to create profile' }
       }
+
+      const supabase = createClient()
 
       const key = generateAPIKey()
       const keyHash = hashAPIKey(key)
       const maskedKey = maskAPIKey(key)
 
       const insertData: APIKeyInsert = {
-        user_id: user.id,
+        user_id: profile.id,
         name: form.name,
         description: form.description,
         key_hash: keyHash,
@@ -102,25 +104,34 @@ export const apiKeyService = {
   // Get user's API keys
   async getAPIKeys(): Promise<APIKeysResponse> {
     try {
-      const supabase = createClient()
-      
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        return { success: false, error: 'Not authenticated' }
+      // Ensure profile exists before trying to fetch API keys
+      const profile = await ensureProfileExists()
+      if (!profile) {
+        return { success: false, error: 'Not authenticated or unable to create profile' }
       }
+
+      const supabase = createClient()
 
       const { data, error } = await supabase
         .from('api_keys')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.error('API Keys fetch error:', error)
+        
+        // Handle specific error cases
+        if (error.code === '42501') {
+          return { success: false, error: 'Permission denied. Please ensure your profile is set up correctly.' }
+        }
+        
         return { success: false, error: error.message }
       }
 
-      return { success: true, apiKeys: data }
+      return { success: true, apiKeys: data || [] }
     } catch (error) {
+      console.error('API Keys service error:', error)
       return { success: false, error: 'Failed to fetch API keys' }
     }
   },

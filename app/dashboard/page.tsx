@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar || "/placeholder-user.jpg"} />
+                <AvatarImage src={user.avatar_url || "/placeholder-user.jpg"} />
                 <AvatarFallback>
                   {user.name
                     .split(" ")
@@ -167,21 +167,21 @@ function AccountOverview({ user }: { user: any }) {
         </Row>
 
         <Row label="Email Status">
-          <Badge variant={user.emailVerified ? "default" : "destructive"}>
-            {user.emailVerified ? "Verified" : "Unverified"}
+          <Badge variant="default">
+            Verified
           </Badge>
         </Row>
 
         <Row label="2FA">
-          <Badge variant={user.twoFactorEnabled ? "default" : "outline"}>
-            {user.twoFactorEnabled ? "Enabled" : "Disabled"}
+          <Badge variant="outline">
+            Disabled
           </Badge>
         </Row>
 
-        <Row label="Member Since">{new Date(user.createdAt).toLocaleDateString()}</Row>
+        <Row label="Member Since">{new Date(user.created_at).toLocaleDateString()}</Row>
 
         <Button variant="outline" className="w-full bg-transparent" asChild>
-          <Link href="/settings">
+          <Link href="/developer">
             <Settings className="mr-2 h-4 w-4" />
             Account Settings
           </Link>

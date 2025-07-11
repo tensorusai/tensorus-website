@@ -144,10 +144,26 @@ export const authService = {
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)
-          .single()
+          .maybeSingle()
 
         if (profileError) {
+          console.error('Profile fetch error:', profileError)
           return AuthErrorHandler.createErrorResponse(new Error('Failed to load user profile'))
+        }
+
+        if (!profile) {
+          // Profile doesn't exist, create a fallback
+          console.log('Profile not found, creating fallback user object')
+          const fallbackUser = {
+            id: data.user.id,
+            email: data.user.email!,
+            name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
+            avatar_url: null,
+            plan: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+          return AuthErrorHandler.createSuccessResponse(fallbackUser)
         }
 
         return AuthErrorHandler.createSuccessResponse(profile)
@@ -184,14 +200,34 @@ export const authService = {
       
       if (!user) return null
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
+
+      if (profileError) {
+        console.error('Profile fetch error in getCurrentUser:', profileError)
+        return null
+      }
+
+      if (!profile) {
+        // Profile doesn't exist, create a fallback
+        console.log('Profile not found in getCurrentUser, creating fallback')
+        return {
+          id: user.id,
+          email: user.email!,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          avatar_url: null,
+          plan: 'free' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      }
 
       return profile
     } catch (error) {
+      console.error('Error in getCurrentUser:', error)
       return null
     }
   }),

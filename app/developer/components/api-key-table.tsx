@@ -27,6 +27,8 @@ export function APIKeyTable({ refreshTrigger }: APIKeyTableProps) {
       
       if (response.success && response.apiKeys) {
         setApiKeys(response.apiKeys)
+      } else if (!response.success) {
+        console.error('Failed to fetch API keys:', response.error)
       }
     } catch (error) {
       console.error('Error fetching API keys:', error)
