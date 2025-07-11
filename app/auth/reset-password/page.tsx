@@ -82,6 +82,8 @@ function ResetPasswordForm() {
     setPending(true)
     setError(null)
 
+    console.log('Starting password reset...')
+
     // Validate passwords
     if (password.length < 6) {
       setError("Password must be at least 6 characters long")
@@ -96,18 +98,23 @@ function ResetPasswordForm() {
     }
 
     try {
+      console.log('Calling updatePassword...')
       const response = await authService.updatePassword(password)
+      console.log('UpdatePassword response:', response)
       
       if (response.success) {
+        console.log('Password updated successfully')
         setSuccess(true)
         // Redirect to dashboard after a short delay
         setTimeout(() => {
           router.push('/dashboard')
         }, 2000)
       } else {
+        console.error('Password update failed:', response.error)
         setError(response.error || "Failed to update password")
       }
     } catch (error) {
+      console.error('Password update error:', error)
       setError("An unexpected error occurred")
     } finally {
       setPending(false)

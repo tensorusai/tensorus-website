@@ -256,16 +256,28 @@ export const authService = {
     try {
       const supabase = createClient()
       
+      // Check if user is authenticated first
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      console.log('Current user for password update:', user ? 'authenticated' : 'not authenticated', userError)
+      
+      if (!user) {
+        return { success: false, error: 'User not authenticated. Please try the reset link again.' }
+      }
+      
+      console.log('Updating password for user:', user.id)
       const { error } = await supabase.auth.updateUser({
         password,
       })
 
       if (error) {
+        console.error('Supabase updateUser error:', error)
         return { success: false, error: error.message }
       }
 
+      console.log('Password updated successfully')
       return { success: true }
     } catch (error) {
+      console.error('UpdatePassword catch error:', error)
       return { success: false, error: 'Password update failed' }
     }
   },
@@ -274,17 +286,25 @@ export const authService = {
     try {
       const supabase = createClient()
       
-      const { error } = await supabase.auth.setSession({
+      console.log('Setting session with tokens:', { 
+        accessToken: accessToken ? 'present' : 'missing',
+        refreshToken: refreshToken ? 'present' : 'missing'
+      })
+      
+      const { data, error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken
       })
 
       if (error) {
+        console.error('SetSession error:', error)
         return { success: false, error: error.message }
       }
 
+      console.log('Session set successfully:', data.user ? 'user authenticated' : 'no user')
       return { success: true }
     } catch (error) {
+      console.error('SetSession catch error:', error)
       return { success: false, error: 'Failed to set session' }
     }
   }
