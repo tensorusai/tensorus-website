@@ -32,7 +32,17 @@ function SignInForm() {
 
   useEffect(() => {
     if (user) {
-      router.push(redirectTo)
+      console.log('User already authenticated, redirecting to:', redirectTo)
+      // Use replace to avoid back button issues and make redirect immediate
+      router.replace(redirectTo)
+      
+      // Fallback in case router.replace doesn't work
+      const fallbackTimer = setTimeout(() => {
+        console.log('Fallback redirect triggered')
+        window.location.href = redirectTo
+      }, 2000)
+      
+      return () => clearTimeout(fallbackTimer)
     }
   }, [user, router, redirectTo])
 
@@ -92,6 +102,33 @@ function SignInForm() {
     }
   }
 
+  // If user exists, show redirecting message
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition-opacity">
+              <Database className="h-8 w-8 text-primary" />
+              Tensorus
+            </Link>
+            <p className="text-muted-foreground mt-2">
+              Redirecting...
+            </p>
+          </div>
+          <Card className="border-0 shadow-lg">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading only if we're actually loading and don't have a user to redirect
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
