@@ -53,7 +53,22 @@ export async function GET(request: NextRequest) {
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
   const next = requestUrl.searchParams.get('next')
+  const type = requestUrl.searchParams.get('type')
+  const accessToken = requestUrl.searchParams.get('access_token')
+  const refreshToken = requestUrl.searchParams.get('refresh_token')
   const baseUrl = getBaseUrl(request)
+  
+  // Debug logging
+  console.log('Auth callback invoked with params:', {
+    code: code ? 'present' : 'missing',
+    error,
+    errorDescription,
+    next,
+    type,
+    accessToken: accessToken ? 'present' : 'missing',
+    refreshToken: refreshToken ? 'present' : 'missing',
+    fullUrl: requestUrl.toString()
+  })
   
   // Handle OAuth errors from Supabase
   if (error) {
@@ -62,7 +77,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/auth/signin?error=oauth_error&message=${errorMessage}`)
   }
 
-  // Handle missing code
+  // Handle password recovery flow
+  if (type === 'recovery' && accessToken && refreshToken) {
+    console.log('Handling password recovery callback')
+    const redirectPath = validateNextPath(next)
+    // For password reset, include the tokens in the URL so the client can use them
+    return NextResponse.redirect(`${baseUrl}${redirectPath}?type=recovery&access_token=${accessToken}&refresh_token=${refreshToken}`)
+  }
+
+  // Handle missing code for email confirmation
   if (!code) {
     console.error('No authorization code provided')
     return NextResponse.redirect(`${baseUrl}/auth/signin?error=missing_code&message=No authorization code provided`)

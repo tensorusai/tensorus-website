@@ -7,40 +7,77 @@ import { motion } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Database, Loader2, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
-  const [message, setMessage] = useState('Confirming your email...')
+  const [message, setMessage] = useState('Processing authentication...')
   
   const code = searchParams?.get('code')
   const error = searchParams?.get('error')
   const next = searchParams?.get('next') || '/dashboard'
 
   useEffect(() => {
-    if (error) {
-      setStatus('error')
-      setMessage('Authentication failed. Please try again.')
-      return
+    const handleCallback = async () => {
+      if (error) {
+        setStatus('error')
+        setMessage('Authentication failed. Please try again.')
+        return
+      }
+
+      try {
+        const supabase = createClient()
+        
+        // First try to get session from URL (for password reset links)
+        const { data: urlData, error: urlError } = await supabase.auth.getSessionFromUrl()
+        
+        if (urlData.session) {
+          console.log('Got session from URL (password reset)')
+          setStatus('success')
+          setMessage('Authentication successful!')
+          
+          // Check if this is a password recovery
+          const type = searchParams?.get('type')
+          if (type === 'recovery') {
+            setTimeout(() => router.push('/auth/reset-password?type=recovery'), 1000)
+          } else {
+            setTimeout(() => router.push(next), 1000)
+          }
+          return
+        }
+
+        // If no session from URL and no code, show error
+        if (!code) {
+          setStatus('error')
+          setMessage('Invalid authentication link. Please try signing in again.')
+          return
+        }
+
+        // If we have a code, the API route should handle it
+        // Just show processing state
+        setMessage('Confirming your email...')
+        
+        // Let the API route handle the callback
+        // This page is just for showing loading state
+        const timer = setTimeout(() => {
+          // If we're still here after 8 seconds, something went wrong
+          setStatus('error')
+          setMessage('Authentication is taking longer than expected. Please try again.')
+        }, 8000)
+
+        return () => clearTimeout(timer)
+        
+      } catch (error) {
+        console.error('Error in callback:', error)
+        setStatus('error')
+        setMessage('An error occurred during authentication. Please try again.')
+      }
     }
 
-    if (!code) {
-      setStatus('error')
-      setMessage('Invalid authentication link. Please try signing in again.')
-      return
-    }
-
-    // Let the API route handle the callback
-    // This page is just for showing loading state
-    const timer = setTimeout(() => {
-      // If we're still here after 5 seconds, something went wrong
-      setStatus('error')
-      setMessage('Authentication is taking longer than expected. Please try again.')
-    }, 5000)
-
-    return () => clearTimeout(timer)
-  }, [code, error])
+    handleCallback()
+  }, [code, error, next, router, searchParams])
 
   const handleRetry = () => {
     router.push('/auth/signin')

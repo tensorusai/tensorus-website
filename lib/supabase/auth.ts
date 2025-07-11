@@ -268,6 +268,25 @@ export const authService = {
     } catch (error) {
       return { success: false, error: 'Password update failed' }
     }
+  },
+
+  async setSession(accessToken: string, refreshToken: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const supabase = createClient()
+      
+      const { error } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: 'Failed to set session' }
+    }
   }
 }
 
