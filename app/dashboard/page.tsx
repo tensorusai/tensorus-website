@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Database, Key, Activity, Settings, BarChart3, Users, Zap, Clock, TrendingUp, Shield, Plus } from "lucide-react"
 
-import { useAuth } from "@/lib/supabase/context"
+import { useAuth } from "@/lib/auth/context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,19 +15,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 
 export default function DashboardPage() {
-  // Supabase auth hook -- provides the shape { user, loading, signOut }
-  const { user, loading, signOut } = useAuth()
+  // Demo auth hook -- provides the shape { state, logout }
+  const { state, logout } = useAuth()
   const router = useRouter()
 
   // Redirect unauthenticated visitors
   useEffect(() => {
-    if (!loading && !user) {
+    if (!state.isLoading && !state.isAuthenticated) {
       router.replace("/auth/signin?redirect=/dashboard")
     }
-  }, [loading, user, router])
+  }, [state.isLoading, state.isAuthenticated, router])
 
   /* -- Loading state ----------------------------------------------------- */
-  if (loading) {
+  if (state.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
@@ -36,7 +36,7 @@ export default function DashboardPage() {
   }
 
   // While redirecting
-  if (!user) return null
+  if (!state.user) return null
 
   /* -- Render dashboard -------------------------------------------------- */
   return (
@@ -59,9 +59,9 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar || "/placeholder-user.jpg"} />
+                <AvatarImage src={state.user.avatar || "/placeholder-state.user.jpg"} />
                 <AvatarFallback>
-                  {user.name
+                  {state.user.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
@@ -69,12 +69,12 @@ export default function DashboardPage() {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden text-sm md:block">
-                <div className="font-medium">{user.name}</div>
-                <div className="text-muted-foreground">{user.email}</div>
+                <div className="font-medium">{state.user.name}</div>
+                <div className="text-muted-foreground">{state.user.email}</div>
               </div>
             </div>
 
-            <Button variant="outline" onClick={signOut}>
+            <Button variant="outline" onClick={logout}>
               Sign Out
             </Button>
           </div>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
       <main className="container mx-auto space-y-8 px-4 py-8">
         {/* Welcome */}
         <section>
-          <h1 className="mb-2 text-3xl font-bold">Welcome back, {user.name.split(" ")[0]}!</h1>
+          <h1 className="mb-2 text-3xl font-bold">Welcome back, {state.user.name.split(" ")[0]}!</h1>
           <p className="text-muted-foreground">Here’s an overview of your Tensorus account and recent activity.</p>
         </section>
 
@@ -162,24 +162,24 @@ function AccountOverview({ user }: { user: any }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <Row label="Plan">
-          <Badge variant={user.plan === "enterprise" ? "default" : user.plan === "pro" ? "secondary" : "outline"}>
-            {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+          <Badge variant={state.user.plan === "enterprise" ? "default" : state.user.plan === "pro" ? "secondary" : "outline"}>
+            {state.user.plan.charAt(0).toUpperCase() + state.user.plan.slice(1)}
           </Badge>
         </Row>
 
         <Row label="Email Status">
-          <Badge variant={user.emailVerified ? "default" : "destructive"}>
-            {user.emailVerified ? "Verified" : "Unverified"}
+          <Badge variant={state.user.emailVerified ? "default" : "destructive"}>
+            {state.user.emailVerified ? "Verified" : "Unverified"}
           </Badge>
         </Row>
 
         <Row label="2FA">
-          <Badge variant={user.twoFactorEnabled ? "default" : "outline"}>
-            {user.twoFactorEnabled ? "Enabled" : "Disabled"}
+          <Badge variant={state.user.twoFactorEnabled ? "default" : "outline"}>
+            {state.user.twoFactorEnabled ? "Enabled" : "Disabled"}
           </Badge>
         </Row>
 
-        <Row label="Member Since">{new Date(user.createdAt).toLocaleDateString()}</Row>
+        <Row label="Member Since">{new Date(state.user.createdAt).toLocaleDateString()}</Row>
 
         <Button variant="outline" className="w-full bg-transparent" asChild>
           <Link href="/settings">
