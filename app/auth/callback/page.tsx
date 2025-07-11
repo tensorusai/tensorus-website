@@ -56,59 +56,27 @@ export default function AuthCallbackPage() {
           return
         }
 
-        const supabase = createClient()
+        // Check if we have query parameters that indicate this is a callback
+        const urlParams = new URLSearchParams(window.location.search)
+        const hasCallbackParams = urlParams.has('code') || urlParams.has('token_hash') || urlParams.has('access_token')
         
-        // First try to get session from URL (for password reset links)
-        const { data: urlData, error: urlError } = await supabase.auth.getSessionFromUrl()
-        
-        if (urlError) {
-          console.error('URL session error:', urlError)
-          setStatus('error')
+        if (hasCallbackParams) {
+          setMessage('Processing authentication...')
           
-          // Handle specific Supabase errors
-          if (urlError.message.includes('expired') || urlError.message.includes('invalid')) {
-            setMessage('This email link has expired or is invalid. Please request a new one.')
-          } else {
-            setMessage('Authentication failed. Please try again.')
-          }
-          return
-        }
-        
-        if (urlData.session) {
-          console.log('Got session from URL (password reset)')
-          setStatus('success')
-          setMessage('Authentication successful!')
-          
-          // Check if this is a password recovery
-          const type = searchParams?.get('type')
-          if (type === 'recovery') {
-            setTimeout(() => router.push('/auth/reset-password?type=recovery'), 1000)
-          } else {
-            setTimeout(() => router.push(next), 1000)
-          }
-          return
-        }
+          // The API route should handle the actual auth processing
+          // This page just shows loading state
+          const timer = setTimeout(() => {
+            // If we're still here after 8 seconds, something went wrong
+            setStatus('error')
+            setMessage('Authentication is taking longer than expected. Please try again.')
+          }, 8000)
 
-        // If no session from URL and no code, show error
-        if (!code) {
+          return () => clearTimeout(timer)
+        } else {
+          // No callback parameters, redirect to signin
           setStatus('error')
           setMessage('Invalid authentication link. Please try signing in again.')
-          return
         }
-
-        // If we have a code, the API route should handle it
-        // Just show processing state
-        setMessage('Confirming your email...')
-        
-        // Let the API route handle the callback
-        // This page is just for showing loading state
-        const timer = setTimeout(() => {
-          // If we're still here after 8 seconds, something went wrong
-          setStatus('error')
-          setMessage('Authentication is taking longer than expected. Please try again.')
-        }, 8000)
-
-        return () => clearTimeout(timer)
         
       } catch (error) {
         console.error('Error in callback:', error)

@@ -105,10 +105,10 @@ export async function GET(request: NextRequest) {
       data = result.data
       exchangeError = result.error
     } else if (tokenHash) {
-      // Token hash pattern
+      // Token hash pattern - use the newer approach
       const result = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
-        type: type as any || 'signup'
+        type: type === 'recovery' ? 'recovery' : type === 'email_change' ? 'email_change' : 'signup'
       })
       data = result.data
       exchangeError = result.error

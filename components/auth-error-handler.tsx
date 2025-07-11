@@ -45,12 +45,13 @@ export default function AuthErrorHandler() {
               router.push(`/auth/signin?error=callback_error&message=${encodeURIComponent(message)}`)
             }
           } else if (accessToken && refreshToken) {
-            // Handle successful auth tokens - redirect to callback
+            // Handle successful auth tokens - redirect to callback API route
             const queryParams = new URLSearchParams()
             queryParams.set('access_token', accessToken)
             queryParams.set('refresh_token', refreshToken)
             if (type) queryParams.set('type', type)
-            router.push(`/auth/callback?${queryParams.toString()}`)
+            // Use the API route directly for processing
+            window.location.href = `/api/auth/callback?${queryParams.toString()}`
           }
         }
       }
