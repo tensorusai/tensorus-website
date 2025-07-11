@@ -39,19 +39,26 @@ function ResetPasswordForm() {
   useEffect(() => {
     // If we have tokens and type is recovery, show reset form
     if (accessToken && refreshToken && type === 'recovery') {
+      console.log('Password reset mode detected with tokens')
       setMode('reset')
       // Set the session using the tokens
       const setSession = async () => {
         try {
           const response = await authService.setSession(accessToken, refreshToken)
           if (!response.success) {
+            console.error('Failed to set session:', response.error)
             setError('Failed to authenticate. Please try the reset link again.')
+          } else {
+            console.log('Session set successfully for password reset')
           }
         } catch (error) {
+          console.error('Error setting session:', error)
           setError('Failed to authenticate. Please try the reset link again.')
         }
       }
       setSession()
+    } else {
+      console.log('Password request mode - no tokens found')
     }
   }, [accessToken, refreshToken, type])
 

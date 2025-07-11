@@ -83,9 +83,8 @@ export async function GET(request: NextRequest) {
   // Handle password recovery flow
   if (type === 'recovery' && accessToken && refreshToken) {
     console.log('Handling password recovery callback')
-    const redirectPath = validateNextPath(next)
-    // For password reset, include the tokens in the URL so the client can use them
-    return NextResponse.redirect(`${baseUrl}${redirectPath}?type=recovery&access_token=${accessToken}&refresh_token=${refreshToken}`)
+    // For password reset, always redirect to reset-password page with tokens
+    return NextResponse.redirect(`${baseUrl}/auth/reset-password?type=recovery&access_token=${accessToken}&refresh_token=${refreshToken}`)
   }
 
   // Handle missing code/token_hash for email confirmation
