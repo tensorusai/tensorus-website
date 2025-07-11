@@ -1,4 +1,4 @@
-import { createRouteClient } from '@/lib/supabase/server'
+import { createRouteClient, createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Whitelist of allowed redirect paths for security
@@ -83,18 +83,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/auth/signin?error=session_failed&message=Failed to create session`)
     }
 
-    // Ensure user profile exists
+    // Ensure user profile exists - use service client to bypass RLS
     if (data.user) {
       try {
-        const { data: profile, error: profileError } = await supabase
+        const serviceClient = createServiceClient()
+        
+        // First check if profile exists
+        const { data: profile, error: profileError } = await serviceClient
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)
           .maybeSingle()
 
-        if (!profile && !profileError) {
-          // Create profile if it doesn't exist
-          const { error: createError } = await supabase
+        if (profileError) {
+          console.error('Error checking profile:', profileError)
+        }
+
+        if (!profile) {
+          // Create profile if it doesn't exist using service client
+          const { error: createError } = await serviceClient
             .from('profiles')
             .insert({
               id: data.user.id,
@@ -105,7 +112,11 @@ export async function GET(request: NextRequest) {
           if (createError) {
             console.error('Failed to create user profile:', createError)
             // Continue anyway - profile can be created later
+          } else {
+            console.log('Successfully created user profile')
           }
+        } else {
+          console.log('User profile already exists')
         }
       } catch (profileError) {
         console.error('Error handling user profile:', profileError)
