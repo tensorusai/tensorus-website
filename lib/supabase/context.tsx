@@ -43,18 +43,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    // Safety timeout to ensure loading state doesn't persist indefinitely
+    const loadingTimeout = setTimeout(() => {
+      console.warn('Auth loading timeout reached after 8 seconds, forcing loading to false')
+      setLoading(false)
+    }, 8000) // 8 second timeout for faster UX
+
     // Get initial session
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        console.log('Getting initial session...')
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Error getting session:', error)
+          setUser(null)
+          return
+        }
         
         if (session?.user) {
+          console.log('Found existing session for user:', session.user.id)
           try {
             const profile = await authService.getCurrentUser()
             if (profile) {
               setUser(profile)
+              console.log('Loaded user profile:', profile.email)
             } else {
               // Profile doesn't exist yet - create a fallback user object
+              console.log('No profile found, creating fallback user object')
               setUser({
                 id: session.user.id,
                 email: session.user.email!,
@@ -78,20 +94,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               updated_at: new Date().toISOString()
             })
           }
+        } else {
+          console.log('No existing session found')
+          setUser(null)
         }
       } catch (error) {
         console.error('Error getting initial session:', error)
+        setUser(null)
       } finally {
+        console.log('Initial session check complete, setting loading to false')
         setLoading(false)
+        clearTimeout(loadingTimeout)
       }
     }
 
+    // Start the initial session check
     getInitialSession()
 
     // Listen for auth changes with enhanced session handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state change:', event, session?.user?.id)
+        
+        // Clear the timeout when auth state changes
+        clearTimeout(loadingTimeout)
         
         if (event === 'SIGNED_IN' && session?.user) {
           try {
@@ -114,6 +140,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (error) {
             console.error('Error handling signed in user:', error)
+            // Even if there's an error, create a basic user object from session
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+              avatar_url: null,
+              plan: 'free' as const,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
@@ -130,11 +166,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Error updating user profile:', error)
           }
         }
+        
+        // Ensure loading is always set to false after auth state changes
         setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(loadingTimeout)
+    }
   }, [supabase])
 
   const signIn = async (credentials: LoginCredentials): Promise<AuthResponse> => {

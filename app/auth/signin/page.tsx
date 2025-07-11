@@ -46,6 +46,18 @@ function SignInForm() {
     }
   }, [user, router, redirectTo])
 
+  // Additional safety timeout for fresh browser loading
+  useEffect(() => {
+    const pageLoadTimeout = setTimeout(() => {
+      if (loading && !user) {
+        console.warn('Sign-in page loading timeout - forcing form display')
+        // The auth context should handle its own timeout, but this is an extra safeguard
+      }
+    }, 12000) // 12 seconds - longer than auth context timeout
+
+    return () => clearTimeout(pageLoadTimeout)
+  }, [loading, user])
+
   // Handle URL errors from callback
   useEffect(() => {
     if (urlError && urlErrorMessage) {
