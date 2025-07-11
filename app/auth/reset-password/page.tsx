@@ -106,9 +106,9 @@ function ResetPasswordForm() {
     }
 
     try {
-      console.log('Calling updatePassword...')
+      console.log('Calling updatePassword with tokens...')
       const response = await Promise.race([
-        authService.updatePassword(password),
+        authService.updatePasswordWithTokens(password, accessToken!, refreshToken!),
         new Promise<{ success: boolean; error?: string }>((_, reject) => 
           setTimeout(() => reject(new Error('updatePassword timeout')), 10000)
         )

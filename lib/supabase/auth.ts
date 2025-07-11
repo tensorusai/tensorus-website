@@ -273,6 +273,27 @@ export const authService = {
     }
   },
 
+  async updatePasswordWithTokens(password: string, accessToken: string, refreshToken: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log('Calling password update API with tokens...')
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password, accessToken, refreshToken }),
+      })
+
+      const data = await response.json()
+      console.log('Password update API response:', data)
+      
+      return data
+    } catch (error) {
+      console.error('UpdatePasswordWithTokens fetch error:', error)
+      return { success: false, error: 'Password update failed' }
+    }
+  },
+
   async setSession(accessToken: string, refreshToken: string): Promise<{ success: boolean; error?: string }> {
     try {
       console.log('Calling set session API...')

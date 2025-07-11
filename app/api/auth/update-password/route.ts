@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json()
+    const { password, accessToken, refreshToken } = await request.json()
 
     if (!password) {
       return NextResponse.json(
@@ -19,20 +19,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!accessToken || !refreshToken) {
+      return NextResponse.json(
+        { success: false, error: 'Access token and refresh token are required' },
+        { status: 400 }
+      )
+    }
+
     const supabase = createRouteClient()
     
-    // Check if user is authenticated
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    console.log('API: Current user for password update:', user ? 'authenticated' : 'not authenticated', userError)
-    
-    if (!user) {
+    // Set the session with the provided tokens
+    console.log('API: Setting session for password update')
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken
+    })
+
+    if (sessionError || !sessionData.user) {
+      console.error('API: Session error:', sessionError)
       return NextResponse.json(
-        { success: false, error: 'User not authenticated. Please try the reset link again.' },
+        { success: false, error: 'Failed to authenticate with provided tokens' },
         { status: 401 }
       )
     }
     
-    console.log('API: Updating password for user:', user.id)
+    console.log('API: Updating password for user:', sessionData.user.id)
     const { error } = await supabase.auth.updateUser({
       password,
     })
