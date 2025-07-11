@@ -20,6 +20,8 @@ function SignInForm() {
   const searchParams = useSearchParams()
   const { login, state } = useAuth()
   
+  console.log('SignInForm loaded, auth state:', state)
+  
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -77,22 +79,30 @@ function SignInForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('Form submitted with data:', { email: formData.email, password: '[hidden]' })
+    
     if (!validateForm()) return
 
     setIsSubmitting(true)
     setErrors({})
 
     try {
+      console.log('Calling login function...')
       const response = await login(formData)
+      console.log('Login response received:', response)
       
       if (!response.success && response.error) {
+        console.log('Login failed, setting errors')
         if (response.error.field) {
           setErrors({ [response.error.field]: response.error.message })
         } else {
           setErrors({ general: response.error.message })
         }
+      } else if (response.success) {
+        console.log('Login successful!')
       }
     } catch (error) {
+      console.error('Login caught error:', error)
       setErrors({ general: 'An unexpected error occurred. Please try again.' })
     } finally {
       setIsSubmitting(false)

@@ -56,12 +56,14 @@ function isValidPassword(password: string): boolean {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    console.log('Demo auth service login called with:', { email: credentials.email, password: '[hidden]' })
     await delay(1000) // Simulate network delay
     
     const { email, password } = credentials
     
     // Validate input
     if (!email || !password) {
+      console.log('Login failed: Missing email or password')
       return {
         success: false,
         error: { code: 'MISSING_FIELDS', message: 'Email and password are required' }
@@ -69,6 +71,7 @@ export const authService = {
     }
     
     if (!isValidEmail(email)) {
+      console.log('Login failed: Invalid email format')
       return {
         success: false,
         error: { code: 'INVALID_EMAIL', message: 'Please enter a valid email address', field: 'email' }
@@ -77,8 +80,11 @@ export const authService = {
     
     // Demo authentication
     const user = DEMO_USERS.find(u => u.email === email)
+    console.log('User lookup result:', user ? 'found' : 'not found')
+    console.log('Available demo users:', DEMO_USERS.map(u => u.email))
     
     if (!user) {
+      console.log('Login failed: User not found')
       return {
         success: false,
         error: { code: 'USER_NOT_FOUND', message: 'No account found with this email address', field: 'email' }
@@ -87,7 +93,11 @@ export const authService = {
     
     // Demo password check (in real app, use proper password hashing)
     const validPasswords = ['password', 'demo123', 'tensorus2024']
+    console.log('Password check:', validPasswords.includes(password) ? 'valid' : 'invalid')
+    console.log('Valid passwords are:', validPasswords)
+    
     if (!validPasswords.includes(password)) {
+      console.log('Login failed: Invalid password')
       return {
         success: false,
         error: { code: 'INVALID_PASSWORD', message: 'Incorrect password', field: 'password' }
@@ -98,6 +108,7 @@ export const authService = {
     const updatedUser = { ...user, lastLoginAt: new Date().toISOString() }
     const token = generateDemoToken(updatedUser)
     
+    console.log('Login successful for user:', updatedUser.email)
     return {
       success: true,
       user: updatedUser,

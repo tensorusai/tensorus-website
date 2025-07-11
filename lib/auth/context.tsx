@@ -90,12 +90,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    console.log('Auth context login called')
     dispatch({ type: 'AUTH_START' })
     
     try {
+      console.log('Calling authService.login...')
       const response = await authService.login(credentials)
+      console.log('Auth service response:', response)
       
       if (response.success && response.user && response.token) {
+        console.log('Login successful, setting localStorage and dispatching success')
         localStorage.setItem('tensorus_token', response.token)
         localStorage.setItem('tensorus_user', JSON.stringify(response.user))
         
@@ -110,6 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           description: `Signed in as ${response.user.name}`,
         })
       } else {
+        console.log('Login failed:', response.error)
         dispatch({ type: 'AUTH_ERROR', payload: response.error! })
         toast({
           title: "Sign in failed",
@@ -120,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return response
     } catch (error) {
+      console.error('Login error in auth context:', error)
       const authError = { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred' }
       dispatch({ type: 'AUTH_ERROR', payload: authError })
       toast({
