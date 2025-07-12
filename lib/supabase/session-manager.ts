@@ -19,9 +19,9 @@ export class SessionManager {
       }
       
       // Check if token is close to expiring (within 5 minutes)
-      const expiresAt = session.expires_at
+      const expiresAt = session?.expires_at
       const now = Math.floor(Date.now() / 1000)
-      const timeUntilExpiry = expiresAt - now
+      const timeUntilExpiry = (expiresAt || 0) - now
       
       if (timeUntilExpiry < 300) { // 5 minutes
         console.log('Token expires soon, attempting refresh...')

@@ -13,7 +13,7 @@ export default function ClientHandler() {
       
       try {
         // Handle the auth callback from URL hash
-        const { data, error } = await supabase.auth.getSessionFromUrl()
+        const { data, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Error getting session from URL:', error)

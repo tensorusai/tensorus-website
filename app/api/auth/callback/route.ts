@@ -126,13 +126,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/auth/signin?error=confirmation_failed&message=${errorMessage}`)
     }
 
-    if (!data.session) {
+    if (!data?.session) {
       console.error('No session returned after code exchange')
       return NextResponse.redirect(`${baseUrl}/auth/signin?error=session_failed&message=Failed to create session`)
     }
 
     // Ensure user profile exists - use service client to bypass RLS
-    if (data.user) {
+    if (data?.user) {
       try {
         const serviceClient = createServiceClient()
         
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
         const { data: profile, error: profileError } = await serviceClient
           .from('profiles')
           .select('*')
-          .eq('id', data.user.id)
+          .eq('id', data?.user?.id)
           .maybeSingle()
 
         if (profileError) {
@@ -152,9 +152,9 @@ export async function GET(request: NextRequest) {
           const { error: createError } = await serviceClient
             .from('profiles')
             .insert({
-              id: data.user.id,
-              email: data.user.email!,
-              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User'
+              id: data?.user?.id!,
+              email: data?.user?.email!,
+              name: data?.user?.user_metadata?.name || data?.user?.email?.split('@')[0] || 'User'
             })
 
           if (createError) {

@@ -21,17 +21,19 @@ export default function Home() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <MainNav />
-          <div className="ml-auto flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link href="/guide">Documentation</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/platform">Platform</Link>
-            </Button>
-            <Button variant="ghost" asChild>
+          <div className="ml-auto flex items-center space-x-2 md:space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" asChild>
+                <Link href="/guide">Documentation</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/platform">Platform</Link>
+              </Button>
+            </div>
+            <Button variant="default" asChild>
               <Link href="/developer">Developer Portal</Link>
             </Button>
-            <Button asChild>
+            <Button asChild className="hidden sm:flex">
               <Link href="/demo">Try Demo</Link>
             </Button>
             <Button variant="outline" asChild>

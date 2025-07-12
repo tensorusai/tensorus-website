@@ -10,25 +10,25 @@ export function Header() {
           <Database className="h-6 w-6 text-primary" />
           <span className="font-bold text-xl">Tensorus</span>
         </Link>
-        <div className="ml-auto flex items-center space-x-4">
-          <Button variant="ghost" asChild>
-            <Link href="/guide">Documentation</Link>
+        <div className="ml-auto flex items-center space-x-2 md:space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" asChild>
+              <Link href="/guide">Documentation</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/platform">Platform</Link>
+            </Button>
+          </div>
+          <Button variant="default" size="sm" asChild>
+            <Link href="/developer">Developer Portal</Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/platform">Platform</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
-              GitHub
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="sm" asChild>
             <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
+              <ArrowLeft className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Back to Home</span>
             </Link>
           </Button>
-          <div className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">Demo Version</div>
+          <div className="hidden sm:block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Demo</div>
         </div>
       </div>
     </header>
