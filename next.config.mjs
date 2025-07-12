@@ -12,25 +12,12 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     serverComponentsExternalPackages: ['@supabase/supabase-js'],
+    // Disable fetchpriority to ensure browser compatibility
+    optimizeCss: false,
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Remove fetchpriority attribute for Firefox compatibility
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization?.splitChunks,
-          cacheGroups: {
-            ...config.optimization?.splitChunks?.cacheGroups,
-            default: {
-              ...config.optimization?.splitChunks?.cacheGroups?.default,
-              priority: undefined,
-            },
-          },
-        },
-      }
-    }
-    return config
+  // Disable experimental features that add unsupported attributes
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 }
 
