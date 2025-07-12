@@ -25,9 +25,6 @@ export default function GuidePage() {
                 <Link href="/platform">Platform</Link>
               </Button>
             </div>
-            <Button variant="default" asChild>
-              <Link href="/developer">Developer Portal</Link>
-            </Button>
             <Button asChild className="hidden sm:flex">
               <Link href="/demo">Try Demo</Link>
             </Button>

@@ -20,9 +20,6 @@ export function Header() {
               <Link href="/platform">Platform</Link>
             </Button>
           </div>
-          <Button variant="default" size="sm" asChild>
-            <Link href="/developer">Developer Portal</Link>
-          </Button>
           <div className="hidden sm:block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Demo</div>
           <AuthNav />
         </div>
