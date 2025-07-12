@@ -1,21 +1,30 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/supabase/context"
 
 export function AuthNav() {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, initialCheckComplete, signOut } = useAuth()
+  const [isClient, setIsClient] = useState(false)
 
-  if (loading) {
+  // Ensure we're on the client side to prevent hydration mismatches
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Show loading state until client-side is ready and initial auth check is complete
+  if (!isClient || !initialCheckComplete || loading) {
     return (
       <div className="flex items-center space-x-2">
-        <div className="h-8 w-16 animate-pulse rounded bg-muted" />
+        <div className="h-8 w-20 animate-pulse rounded bg-muted" />
       </div>
     )
   }
 
+  // User is authenticated
   if (user) {
     return (
       <div className="flex items-center space-x-2">
@@ -45,6 +54,7 @@ export function AuthNav() {
     )
   }
 
+  // User is not authenticated
   return (
     <div className="flex items-center space-x-2">
       <Button variant="outline" asChild>

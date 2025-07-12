@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast'
 interface AuthContextType {
   user: User | null
   loading: boolean
+  initialCheckComplete: boolean
   signIn: (credentials: LoginCredentials) => Promise<AuthResponse>
   signUp: (credentials: SignupCredentials) => Promise<AuthResponse>
   signOut: () => Promise<void>
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false)
   const { toast } = useToast()
   
   let supabase: any
@@ -31,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       <AuthContext.Provider value={{
         user: null,
         loading: false,
+        initialCheckComplete: true,
         signIn: async () => ({ success: false, error: { code: 'CONFIG_ERROR', message: 'Supabase not configured' } }),
         signUp: async () => ({ success: false, error: { code: 'CONFIG_ERROR', message: 'Supabase not configured' } }),
         signOut: async () => {},
@@ -103,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } finally {
         console.log('Initial session check complete, setting loading to false')
         setLoading(false)
+        setInitialCheckComplete(true)
         clearTimeout(loadingTimeout)
       }
     }
@@ -167,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Ensure loading is always set to false after auth state changes
         setLoading(false)
+        setInitialCheckComplete(true)
       }
     )
 
@@ -329,6 +334,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    initialCheckComplete,
     signIn,
     signUp,
     signOut,
