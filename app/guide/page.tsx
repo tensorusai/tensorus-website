@@ -22,9 +22,6 @@ export default function GuidePage() {
           <div className="ml-auto flex items-center space-x-2 md:space-x-4">
             <div className="hidden md:flex items-center space-x-4">
               <Button variant="ghost" asChild>
-                <Link href="/">Home</Link>
-              </Button>
-              <Button variant="ghost" asChild>
                 <Link href="/platform">Platform</Link>
               </Button>
             </div>
