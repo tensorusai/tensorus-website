@@ -27,11 +27,6 @@ export default function GuidePage() {
               <Button variant="ghost" asChild>
                 <Link href="/platform">Platform</Link>
               </Button>
-              <Button variant="ghost" asChild>
-                <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
-                  GitHub
-                </Link>
-              </Button>
             </div>
             <Button variant="default" asChild>
               <Link href="/developer">Developer Portal</Link>
