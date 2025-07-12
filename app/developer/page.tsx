@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainNav } from "@/components/main-nav"
 import { AuthNav } from "@/components/auth-nav"
-import { Key, Code, BookOpen, HelpCircle, ArrowLeft } from "lucide-react"
+import { Key, Code, BookOpen, HelpCircle } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Developer Portal | Tensorus",
@@ -18,12 +18,6 @@ export default function DeveloperPortal() {
         <div className="container flex h-16 items-center">
           <MainNav />
           <div className="ml-auto flex items-center space-x-4">
-            <Button variant="outline" asChild>
-              <Link href="/" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Main Site
-              </Link>
-            </Button>
             <AuthNav />
           </div>
         </div>

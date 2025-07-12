@@ -6,10 +6,11 @@ import { AuthGuard } from "../components/auth-guard"
 import { APIKeyForm } from "../components/api-key-form"
 import { APIKeyTable } from "../components/api-key-table"
 import { MainNav } from "@/components/main-nav"
+import { AuthNav } from "@/components/auth-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ArrowLeft, Shield, Code, Zap, Info } from "lucide-react"
+import { Shield, Code, Zap, Info } from "lucide-react"
 import Link from "next/link"
 import type { APIKey } from "../types/api-keys"
 
@@ -27,12 +28,7 @@ export default function APIKeysPage() {
           <div className="container flex h-16 items-center">
             <MainNav />
             <div className="ml-auto flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link href="/developer" className="flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Portal
-                </Link>
-              </Button>
+              <AuthNav />
             </div>
           </div>
         </header>

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Database, ArrowLeft } from "lucide-react"
+import { Database } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthNav } from "@/components/auth-nav"
 
@@ -22,12 +22,6 @@ export function Header() {
           </div>
           <Button variant="default" size="sm" asChild>
             <Link href="/developer">Developer Portal</Link>
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">Back to Home</span>
-            </Link>
           </Button>
           <div className="hidden sm:block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Demo</div>
           <AuthNav />
