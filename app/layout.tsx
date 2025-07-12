@@ -17,6 +17,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Firefox compatibility: Remove fetchpriority attribute
+              if (typeof window !== 'undefined' && navigator.userAgent.includes('Firefox')) {
+                document.addEventListener('DOMContentLoaded', function() {
+                  const links = document.querySelectorAll('link[fetchpriority]');
+                  links.forEach(link => link.removeAttribute('fetchpriority'));
+                });
+              }
+            `,
+          }}
+        />
+      </head>
       <body>
         <AuthProvider>
           <AuthErrorHandler />
