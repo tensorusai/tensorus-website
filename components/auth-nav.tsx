@@ -7,16 +7,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/supabase/context"
 
 export function AuthNav() {
-  const { user, loading, initialCheckComplete, signOut } = useAuth()
-  const [isClient, setIsClient] = useState(false)
+  const { user, isInitialized, signOut } = useAuth()
+  const [mounted, setMounted] = useState(false)
 
-  // Ensure we're on the client side to prevent hydration mismatches
+  // Prevent hydration mismatches
   useEffect(() => {
-    setIsClient(true)
+    setMounted(true)
   }, [])
 
-  // Show loading state until client-side is ready and initial auth check is complete
-  if (!isClient || !initialCheckComplete || loading) {
+  // Don't render anything until both mounted and initialized
+  if (!mounted || !isInitialized) {
     return (
       <div className="flex items-center space-x-2">
         <div className="h-8 w-20 animate-pulse rounded bg-muted" />
@@ -24,7 +24,7 @@ export function AuthNav() {
     )
   }
 
-  // User is authenticated
+  // User is signed in
   if (user) {
     return (
       <div className="flex items-center space-x-2">
@@ -54,7 +54,7 @@ export function AuthNav() {
     )
   }
 
-  // User is not authenticated
+  // User is not signed in
   return (
     <div className="flex items-center space-x-2">
       <Button variant="outline" asChild>
