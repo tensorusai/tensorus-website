@@ -26,15 +26,16 @@ export function AuthNav() {
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar_url || "/placeholder-user.jpg"} />
             <AvatarFallback>
-              {user.name
+              {(user.name || user.email || "U")
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
-                .toUpperCase()}
+                .toUpperCase()
+                .slice(0, 2)}
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block">
-            <div className="text-sm font-medium">{user.name}</div>
+            <div className="text-sm font-medium">{user.name || "User"}</div>
           </div>
         </div>
         <Button variant="outline" onClick={signOut} size="sm">

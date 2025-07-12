@@ -246,6 +246,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.signOut()
       setUser(null)
+      
+      // Security: Redirect to home page after successful sign out
+      if (typeof window !== 'undefined') {
+        window.location.href = '/'
+      }
+      
       toast({
         title: "Signed out",
         description: "You have been signed out successfully",
