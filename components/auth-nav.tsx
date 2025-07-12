@@ -47,9 +47,6 @@ export function AuthNav() {
 
   return (
     <div className="flex items-center space-x-2">
-      <Button variant="ghost" asChild className="hidden sm:flex">
-        <Link href="/auth/signup">Sign Up</Link>
-      </Button>
       <Button variant="outline" asChild>
         <Link href="/auth/signin">Sign In</Link>
       </Button>
