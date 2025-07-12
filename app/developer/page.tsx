@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainNav } from "@/components/main-nav"
+import { AuthNav } from "@/components/auth-nav"
 import { Key, Code, BookOpen, HelpCircle, ArrowLeft } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function DeveloperPortal() {
                 Back to Main Site
               </Link>
             </Button>
+            <AuthNav />
           </div>
         </div>
       </header>

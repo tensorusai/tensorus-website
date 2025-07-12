@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Database, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AuthNav } from "@/components/auth-nav"
 
 export function Header() {
   return (
@@ -29,6 +30,7 @@ export function Header() {
             </Link>
           </Button>
           <div className="hidden sm:block rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">Demo</div>
+          <AuthNav />
         </div>
       </div>
     </header>

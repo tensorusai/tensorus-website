@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, Cpu, Brain, Search, BarChart, ArrowRight } from "lucide-react"
 import { MainNav } from "@/components/main-nav"
+import { AuthNav } from "@/components/auth-nav"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
@@ -18,21 +19,27 @@ export default function GuidePage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
           <MainNav />
-          <div className="ml-auto flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link href="/">Home</Link>
+          <div className="ml-auto flex items-center space-x-2 md:space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
+              <Button variant="ghost" asChild>
+                <Link href="/">Home</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/platform">Platform</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
+                  GitHub
+                </Link>
+              </Button>
+            </div>
+            <Button variant="default" asChild>
+              <Link href="/developer">Developer Portal</Link>
             </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/platform">Platform</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </Link>
-            </Button>
-            <Button asChild>
+            <Button asChild className="hidden sm:flex">
               <Link href="/demo">Try Demo</Link>
             </Button>
+            <AuthNav />
           </div>
         </div>
       </header>

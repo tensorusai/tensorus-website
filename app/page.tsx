@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { MainNav } from "@/components/main-nav"
+import { AuthNav } from "@/components/auth-nav"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturesSection } from "@/components/features-section"
 import { TransformSection } from "@/components/transform-section"
@@ -36,9 +37,7 @@ export default function Home() {
             <Button asChild className="hidden sm:flex">
               <Link href="/demo">Try Demo</Link>
             </Button>
-            <Button variant="outline" asChild>
-              <Link href="/auth/signin">Sign In</Link>
-            </Button>
+            <AuthNav />
           </div>
         </div>
       </header>
