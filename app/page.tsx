@@ -31,11 +31,6 @@ export default function Home() {
             <Button variant="ghost" asChild>
               <Link href="/developer">Developer Portal</Link>
             </Button>
-            <Button variant="ghost" asChild>
-              <Link href="https://github.com/tensorus" target="_blank" rel="noopener noreferrer">
-                GitHub
-              </Link>
-            </Button>
             <Button asChild>
               <Link href="/demo">Try Demo</Link>
             </Button>

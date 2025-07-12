@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
   
-  let supabase
+  let supabase: any
   try {
     supabase = createClient()
   } catch (error) {
@@ -52,8 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('Getting initial session...')
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { session }, error } = await (supabase as any).auth.getSession()
         
         if (error) {
           console.error('Error getting session:', error)
@@ -112,9 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getInitialSession()
 
     // Listen for auth changes with enhanced session handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id)
+    const { data: { subscription } } = (supabase as any).auth.onAuthStateChange(
+      async (event: any, session: any) => {
         
         // Clear the timeout when auth state changes
         clearTimeout(loadingTimeout)
