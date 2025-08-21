@@ -10,13 +10,18 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Database, ArrowLeft, AlertCircle, Loader2 } from "lucide-react"
-import { useAuth } from "@/lib/supabase/context"
-import type { LoginCredentials } from "@/lib/supabase/auth"
+import { useAuth } from "@/lib/aws/context"
+import { signIn } from "@/lib/aws/auth"
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
 function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, loading, signIn } = useAuth()
+  const { user, loading } = useAuth()
   
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -102,10 +107,12 @@ function SignInForm() {
     setErrors({})
 
     try {
-      const response = await signIn(formData)
+      const response = await signIn(formData.email, formData.password)
       
-      if (response.success) {
+      if (response.user) {
         router.push(redirectTo)
+      } else if (response.error) {
+        setErrors({ general: response.error.message || 'Sign in failed' })
       }
     } catch (error) {
       setErrors({ general: 'An unexpected error occurred. Please try again.' })

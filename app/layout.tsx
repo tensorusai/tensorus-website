@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AuthProvider } from '@/lib/supabase/context'
+import { AuthProvider } from '@/lib/aws/context'
 import { Toaster } from '@/components/ui/toaster'
 import AuthErrorHandler from '@/components/auth-error-handler'
 

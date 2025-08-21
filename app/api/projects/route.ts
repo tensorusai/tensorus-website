@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { serverAuthService } from '@/lib/supabase/auth'
-import { projectService } from '@/lib/supabase/projects'
+import { serverAuthService } from '@/lib/aws/server-auth'
+import { projectService } from '@/lib/aws/projects'
 
 export async function GET() {
   try {
