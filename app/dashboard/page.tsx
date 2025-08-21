@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Database, BarChart, Code } from "lucide-react"
 
-import { useAuth } from "@/lib/supabase/context"
+import { useAuth } from "@/lib/aws/context"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"

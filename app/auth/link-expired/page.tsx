@@ -10,12 +10,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Database, AlertCircle, Mail, ArrowLeft, RefreshCw } from 'lucide-react'
-import { useAuth } from '@/lib/supabase/context'
+import { resetPassword } from '@/lib/aws/auth'
 
 function LinkExpiredContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { resetPassword } = useAuth()
   
   const [email, setEmail] = useState('')
   const [pending, setPending] = useState(false)
@@ -39,10 +38,10 @@ function LinkExpiredContent() {
     try {
       if (isPasswordReset) {
         const response = await resetPassword(email)
-        if (response.success) {
+        if (!response.error) {
           setSent(true)
         } else {
-          setError(response.error || 'Failed to send reset link')
+          setError(response.error.message || 'Failed to send reset link')
         }
       } else {
         // For email confirmation, we'd need to implement a resend confirmation endpoint

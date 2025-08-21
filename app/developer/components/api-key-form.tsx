@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Plus, Copy, Eye, EyeOff, CheckCircle } from 'lucide-react'
-import { apiKeyService, type APIKeyForm } from '@/lib/supabase/api-keys'
+import { apiKeyService, type APIKeyForm } from '@/lib/aws/api-keys'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name too long'),

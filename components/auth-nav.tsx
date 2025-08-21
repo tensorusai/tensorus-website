@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/lib/supabase/context"
+import { useAuth } from "@/lib/aws/context"
 
 export function AuthNav() {
   const { user, isInitialized, signOut } = useAuth()

@@ -12,13 +12,11 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Database, Eye, EyeOff, CheckCircle, ArrowLeft, AlertCircle } from "lucide-react"
-import { useAuth } from "@/lib/supabase/context"
-import { authService } from "@/lib/supabase/auth"
+import { resetPassword, confirmResetPassword } from "@/lib/aws/auth"
 
 function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { resetPassword } = useAuth()
   
   // Check if we have access token (from password reset link)
   const accessToken = searchParams?.get('access_token')
@@ -37,38 +35,12 @@ function ResetPasswordForm() {
   const [pending, setPending] = useState(false)
 
   useEffect(() => {
-    // If we have tokens and type is recovery, show reset form
-    if (accessToken && refreshToken && type === 'recovery') {
-      console.log('Password reset mode detected with tokens')
+    // AWS Cognito uses different flow - check for code parameter
+    const code = searchParams?.get('code')
+    if (code) {
       setMode('reset')
-      // Set the session using the tokens
-      const setSession = async () => {
-        try {
-          console.log('About to call setSession...')
-          const response = await Promise.race([
-            authService.setSession(accessToken, refreshToken),
-            new Promise<{ success: boolean; error?: string }>((_, reject) => 
-              setTimeout(() => reject(new Error('setSession timeout')), 10000)
-            )
-          ]) as { success: boolean; error?: string }
-          console.log('setSession completed with response:', response)
-          
-          if (!response.success) {
-            console.error('Failed to set session:', response.error)
-            setError('Failed to authenticate. Please try the reset link again.')
-          } else {
-            console.log('Session set successfully for password reset')
-          }
-        } catch (error) {
-          console.error('Error setting session:', error)
-          setError('Failed to authenticate. Please try the reset link again.')
-        }
-      }
-      setSession()
-    } else {
-      console.log('Password request mode - no tokens found')
     }
-  }, [accessToken, refreshToken, type])
+  }, [searchParams])
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,8 +49,8 @@ function ResetPasswordForm() {
 
     const response = await resetPassword(email)
 
-    if (!response.success) {
-      setError(response.error || "An error occurred during password reset")
+    if (response.error) {
+      setError(response.error.message || "An error occurred during password reset")
     } else {
       setSent(true)
     }
@@ -106,28 +78,24 @@ function ResetPasswordForm() {
     }
 
     try {
-      console.log('Calling updatePassword with tokens...')
-      const response = await Promise.race([
-        authService.updatePasswordWithTokens(password, accessToken!, refreshToken!),
-        new Promise<{ success: boolean; error?: string }>((_, reject) => 
-          setTimeout(() => reject(new Error('updatePassword timeout')), 10000)
-        )
-      ]) as { success: boolean; error?: string }
-      console.log('UpdatePassword response:', response)
+      const code = searchParams?.get('code')
+      if (!code) {
+        setError("Invalid reset code")
+        setPending(false)
+        return
+      }
+
+      const response = await confirmResetPassword(email, code, password)
       
-      if (response.success) {
-        console.log('Password updated successfully')
+      if (!response.error) {
         setSuccess(true)
-        // Redirect to dashboard after a short delay
         setTimeout(() => {
           router.push('/dashboard')
         }, 2000)
       } else {
-        console.error('Password update failed:', response.error)
-        setError(response.error || "Failed to update password")
+        setError(response.error.message || "Failed to update password")
       }
     } catch (error) {
-      console.error('Password update error:', error)
       setError("An unexpected error occurred")
     } finally {
       setPending(false)

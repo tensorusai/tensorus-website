@@ -12,11 +12,12 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Database, AlertCircle, Loader2, CheckCircle } from "lucide-react"
-import { useAuth } from "@/lib/supabase/context"
+import { useAuth } from "@/lib/aws/context"
+import { signUp } from "@/lib/aws/auth"
 
 export default function SignUpPage() {
   const router = useRouter()
-  const { user, loading, signUp } = useAuth()
+  const { user, loading } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -74,29 +75,21 @@ export default function SignUpPage() {
     setIsSubmitting(true)
     
     try {
-      const response = await signUp({ 
-        email: formData.email.trim(), 
-        password: formData.password, 
-        name: formData.name.trim() 
-      })
+      const response = await signUp(
+        formData.email.trim(), 
+        formData.password, 
+        formData.name.trim()
+      )
       
-      if (response.success) {
-        if (response.user) {
-          // Successful signup with user data
-          setSuccess(true)
-          setTimeout(() => {
-            router.replace("/dashboard")
-          }, 1500)
-        } else {
-          // Email confirmation required
-          setSuccess(true)
-          setErrors({
-            general: "Please check your email and click the confirmation link to activate your account."
-          })
-        }
-      } else {
+      if (response.user) {
+        // Successful signup - email confirmation required for Cognito
+        setSuccess(true)
         setErrors({
-          general: response.error?.message || "Registration failed. Please try again."
+          general: "Please check your email and click the confirmation link to activate your account."
+        })
+      } else if (response.error) {
+        setErrors({
+          general: response.error.message || "Registration failed. Please try again."
         })
       }
     } catch (error) {

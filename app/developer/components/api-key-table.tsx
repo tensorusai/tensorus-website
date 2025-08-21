@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Trash2, Ban, Shield, Activity } from 'lucide-react'
-import { apiKeyService } from '@/lib/supabase/api-keys'
+import { apiKeyService } from '@/lib/aws/api-keys'
 import type { Database } from '@/lib/supabase/database.types'
 
 type APIKey = Database['public']['Tables']['api_keys']['Row']

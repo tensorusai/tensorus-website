@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { serverAuthService } from '@/lib/supabase/auth'
-import { apiKeyService } from '@/lib/supabase/api-keys'
+import { apiKeyService } from '@/lib/aws/api-keys'
 
 export async function PUT(
   request: NextRequest,
