@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { serverAuthService } from '@/lib/supabase/auth'
+import { serverAuthService } from '@/lib/aws/server-auth'
 import { tensorService } from '@/lib/supabase/tensors'
 
 export async function GET(request: NextRequest) {
