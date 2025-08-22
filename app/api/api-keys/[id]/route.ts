@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { serverAuthService } from '@/lib/aws/server-auth'
+import { serverAuthService } from '@/lib/supabase/auth'
 import { apiKeyService } from '@/lib/aws/api-keys'
 
 export async function PUT(
@@ -19,10 +19,9 @@ export async function PUT(
     let result
 
     if (action === 'revoke') {
-      result = await apiKeyService.revokeApiKey(params.id, user.id)
+      result = await apiKeyService.revokeAPIKey(params.id)
     } else {
-      // For now just handle revoke action
-      return NextResponse.json({ error: 'Update not implemented' }, { status: 400 })
+      result = await apiKeyService.updateAPIKey(params.id, updates)
     }
 
     if (!result.success) {
@@ -46,7 +45,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const result = await apiKeyService.deleteApiKey(params.id, user.id)
+    const result = await apiKeyService.deleteAPIKey(params.id)
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 })

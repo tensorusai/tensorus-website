@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { serverAuthService } from '@/lib/aws/server-auth'
+import { serverAuthService } from '@/lib/supabase/auth'
 import { apiKeyService } from '@/lib/aws/api-keys'
 
 export async function GET() {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const result = await apiKeyService.getApiKeys(user.id)
+    const result = await apiKeyService.getAPIKeys()
     
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 })
@@ -37,8 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    const result = await apiKeyService.createApiKey({
-      userId: user.id,
+    const result = await apiKeyService.createAPIKey({
       name,
       description,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
